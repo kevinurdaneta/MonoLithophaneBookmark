@@ -329,7 +329,27 @@
       ctx.drawImage(currentImage, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
 
-      const imgData = ctx.getImageData(0, 0, resX, resY).data;
+      // Extract image data
+      const imageDataObj = ctx.getImageData(0, 0, resX, resY);
+      const data = imageDataObj.data;
+
+      // Convert the entire canvas to grayscale so the 3D preview matches a monocolor print
+      for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i+1];
+          const b = data[i+2];
+          
+          // Calculate luminance
+          const lum = (0.299 * r + 0.587 * g + 0.114 * b);
+          
+          // Overwrite RGB with the grayscale value
+          data[i] = lum;     // R
+          data[i+1] = lum;   // G
+          data[i+2] = lum;   // B
+      }
+      
+      // Paint the grayscale pixels back onto the canvas
+      ctx.putImageData(imageDataObj, 0, 0);
 
       // Darken margins on canvas to prevent glowing borders
       ctx.fillStyle = '#000000';
@@ -337,6 +357,9 @@
       ctx.fillRect(0, resY - marginPxY, resX, marginPxY); 
       ctx.fillRect(0, 0, marginPxX, resY); 
       ctx.fillRect(resX - marginPxX, 0, marginPxX, resY); 
+
+      // Re-fetch the final data (now grayscale and with black borders) for the 3D mesh math
+      const finalImgData = ctx.getImageData(0, 0, resX, resY).data;
 
       const geometry = new THREE.BoxGeometry(fixedWidth, fixedHeight, maxZ, resX - 1, resY - 1, 1);
       const pos = geometry.attributes.position;
@@ -350,11 +373,11 @@
                 pos.setZ(i, maxZ);
             } else {
                 const pxIdx = (py * resX + px) * 4;
-                const r = imgData[pxIdx] !== undefined ? imgData[pxIdx] : 255;
-                const g = imgData[pxIdx + 1] !== undefined ? imgData[pxIdx + 1] : 255;
-                const b = imgData[pxIdx + 2] !== undefined ? imgData[pxIdx + 2] : 255;
                 
-                let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                // Since it is now grayscale, we only need to read the Red channel for brightness
+                const lumRaw = finalImgData[pxIdx] !== undefined ? finalImgData[pxIdx] : 255;
+                
+                let lum = lumRaw / 255;
                 if (invert) lum = 1.0 - lum;
                 lum = Math.pow(lum, gamma);
                 
