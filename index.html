@@ -11,45 +11,30 @@
     }
   </script>
   <style>
-    /* Skeuomorphic Scrollbar */
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: #151515; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; border: 1px solid #444; box-shadow: inset 0 1px 1px rgba(255,255,255,0.2); }
-    ::-webkit-scrollbar-thumb:hover { background: #444; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
     
-    /* Tactile Range Sliders */
     input[type=range] {
       -webkit-appearance: none;
       background: #111;
-      border-radius: 8px;
-      box-shadow: inset 0 1px 4px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.1);
-      height: 8px;
+      border-radius: 4px;
+      height: 6px;
+      border: 1px solid #333;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 18px;
-      width: 18px;
+      height: 16px; width: 16px;
       border-radius: 50%;
-      background: radial-gradient(circle at top, #1EE5EB, #0d8c90);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.6);
-      border: 1px solid #000;
+      background: #1EE5EB;
       cursor: pointer;
     }
     
-    /* Skeuomorphic Inputs */
-    .inset-input {
-      background-color: #1a1a1a;
-      border: 1px solid #0a0a0a;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08);
-      color: #eaeaea;
-    }
-    
-    /* Skeuomorphic Panels */
-    .bevel-panel {
-      background: linear-gradient(180deg, #333333 0%, #252525 100%);
-      border: 1px solid #111;
-      border-top: 1px solid #4a4a4a;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    .panel-header {
+      background: #1f1f1f;
+      border-top: 1px solid #3a3a3a;
+      border-bottom: 1px solid #111;
     }
   </style>
   <script type="importmap">
@@ -61,74 +46,96 @@
     }
   </script>
 </head>
-<body class="bg-[#0a0a0a] text-white h-screen flex overflow-hidden font-sans">
+<body class="bg-customBlack text-gray-300 h-screen flex overflow-hidden font-sans text-sm">
 
   <!-- Viewport -->
-  <div id="viewport" class="flex-1 relative cursor-crosshair bg-gradient-to-br from-[#1a1a1a] to-[#050505]">
-    <div class="absolute top-5 left-5 flex gap-2">
-      <button id="toggleLightBtn" class="bevel-panel hover:brightness-110 active:translate-y-[1px] active:shadow-inner text-gray-300 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+  <div id="viewport" class="flex-1 relative cursor-crosshair">
+    <!-- UI Overlay inside Viewport -->
+    <div class="absolute top-4 left-4 flex gap-2 z-10">
+      <button id="toggleLightBtn" class="bg-customGray hover:bg-gray-700 border border-gray-600 text-white px-3 py-1.5 rounded shadow">
         Toggle Backlight View
       </button>
     </div>
   </div>
 
-  <!-- Sidebar -->
-  <div id="sidebar" class="w-[360px] bg-gradient-to-b from-[#2d2d2d] to-[#1e1e1e] p-5 flex flex-col gap-5 overflow-y-auto border-l border-[#444] shadow-[-10px_0_20px_rgba(0,0,0,0.6)] z-10">
+  <!-- Sidebar (BumpMesh Style) -->
+  <div id="sidebar" class="w-[380px] bg-customGray flex flex-col border-l border-gray-700 shadow-xl overflow-y-auto z-10">
     
-    <div class="mb-2">
-      <h2 class="text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-b from-[#1EE5EB] to-[#0d8c90] drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">Bookmark Maker</h2>
-      <p class="text-xs text-gray-400 font-medium">Banned Books Week Workshop</p>
+    <!-- Header -->
+    <div class="p-5 pb-3">
+      <h2 class="text-xl font-bold tracking-wide text-customTeal flex items-center justify-between">
+        Bookmark Maker
+        <span class="text-[10px] text-gray-500 font-normal">v2.0</span>
+      </h2>
+      <p class="text-xs text-gray-400 mt-1">138mm x 46mm Fixed Dimensions</p>
     </div>
 
-    <!-- Image Setup -->
-    <div class="space-y-3 bevel-panel p-4 rounded-xl">
-      <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 drop-shadow-md">1. Image Source</label>
-      <input type="file" id="imageInput" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gradient-to-b file:from-[#444] file:to-[#222] file:text-customTeal file:shadow-[0_2px_4px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] hover:file:brightness-110 cursor-pointer" />
-      <select id="imageMode" class="w-full inset-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-customTeal mt-2">
-        <option value="fit">Mode: Fit (White Borders)</option>
+    <!-- Gallery -->
+    <div class="px-5 pb-4">
+      <label class="block text-xs font-bold text-gray-400 mb-2">Sample Images</label>
+      <div class="flex gap-2 overflow-x-auto pb-1" id="gallery">
+        <!-- These act as placeholders. You can replace src with real images -->
+        <img src="CensorshipIsSo1984-bookmark-main-single.png" class="h-12 w-12 object-cover rounded border border-gray-600 cursor-pointer hover:border-customTeal gallery-img" data-src="CensorshipIsSo1984-bookmark-main-single.png" alt="1984">
+        <div class="h-12 w-12 bg-gradient-to-tr from-gray-700 to-gray-500 rounded border border-gray-600 cursor-pointer hover:border-customTeal gallery-img flex items-center justify-center text-[10px]" data-src="placeholder_texture">Texture</div>
+      </div>
+    </div>
+
+    <!-- Accordion 1: Image Source -->
+    <div class="panel-header px-5 py-3 font-bold text-gray-200">1. Image Source</div>
+    <div class="px-5 py-4 space-y-3 bg-[#222]">
+      <input type="file" id="imageInput" accept="image/png, image/jpeg" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-gray-700 file:text-customTeal hover:file:bg-gray-600 cursor-pointer" />
+      <select id="imageMode" class="w-full bg-[#111] border border-gray-600 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-customTeal">
         <option value="fill">Mode: Fill (Crop to Edge)</option>
+        <option value="fit">Mode: Fit (White Borders)</option>
       </select>
     </div>
 
-    <!-- Transform & Contrast -->
-    <div class="space-y-4 bevel-panel p-4 rounded-xl">
-      <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 drop-shadow-md">2. Image Adjustments</label>
+    <!-- Accordion 2: Margin & Borders -->
+    <div class="panel-header px-5 py-3 font-bold text-gray-200">2. Frame & Margin</div>
+    <div class="px-5 py-4 space-y-4 bg-[#222]">
       <div class="flex flex-col gap-1.5">
-        <div class="flex justify-between text-xs font-medium text-gray-300"><span>Scale</span><span id="scaleVal">1.0</span></div>
-        <input type="range" id="imgScale" min="0.1" max="3" step="0.1" value="1" class="w-full">
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <div class="flex justify-between text-xs font-medium text-gray-300"><span>Offset X</span><span id="xVal">0</span></div>
-        <input type="range" id="imgOffsetX" min="-100" max="100" step="1" value="0" class="w-full">
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <div class="flex justify-between text-xs font-medium text-gray-300"><span>Offset Y</span><span id="yVal">0</span></div>
-        <input type="range" id="imgOffsetY" min="-100" max="100" step="1" value="0" class="w-full">
-      </div>
-      <div class="flex flex-col gap-1.5 mt-3 pt-3 border-t border-[#111] shadow-[0_1px_0_rgba(255,255,255,0.05)]">
-        <div class="flex justify-between text-xs font-bold text-customTeal"><span>Midpoint (Contrast)</span><span id="midVal">1.0</span></div>
-        <input type="range" id="imgMidpoint" min="0.1" max="3.0" step="0.1" value="1.0" class="w-full">
-      </div>
-      <div class="flex items-center gap-3 pt-2">
-        <input type="checkbox" id="invertCheck" class="w-4 h-4 cursor-pointer inset-input rounded accent-customTeal">
-        <label for="invertCheck" class="text-xs font-medium text-gray-300 cursor-pointer">Invert Image (Negative)</label>
+        <div class="flex justify-between text-xs text-gray-400"><span>Solid Border Margin (mm)</span><span id="marginVal">4</span></div>
+        <input type="range" id="borderMargin" min="0" max="15" step="1" value="4" class="w-full">
       </div>
     </div>
 
-    <!-- Print Settings -->
-    <div class="space-y-3 bevel-panel p-4 rounded-xl">
-      <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 drop-shadow-md">3. Print Settings (mm)</label>
+    <!-- Accordion 3: Transform & Contrast -->
+    <div class="panel-header px-5 py-3 font-bold text-gray-200">3. Adjustments</div>
+    <div class="px-5 py-4 space-y-4 bg-[#222]">
+      <div class="flex flex-col gap-1.5">
+        <div class="flex justify-between text-xs text-gray-400"><span>Scale</span><span id="scaleVal">1.0</span></div>
+        <input type="range" id="imgScale" min="0.1" max="3" step="0.1" value="1" class="w-full">
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <div class="flex justify-between text-xs text-gray-400"><span>Offset X</span><span id="xVal">0</span></div>
+        <input type="range" id="imgOffsetX" min="-100" max="100" step="1" value="0" class="w-full">
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <div class="flex justify-between text-xs text-gray-400"><span>Offset Y</span><span id="yVal">0</span></div>
+        <input type="range" id="imgOffsetY" min="-100" max="100" step="1" value="0" class="w-full">
+      </div>
+      <div class="flex flex-col gap-1.5 pt-2">
+        <div class="flex justify-between text-xs text-customTeal font-bold"><span>Midpoint (Contrast)</span><span id="midVal">1.0</span></div>
+        <input type="range" id="imgMidpoint" min="0.1" max="3.0" step="0.1" value="1.0" class="w-full">
+      </div>
+      <div class="flex items-center gap-2 pt-1">
+        <input type="checkbox" id="invertCheck" class="w-4 h-4 cursor-pointer accent-customTeal rounded bg-[#111]">
+        <label for="invertCheck" class="text-xs cursor-pointer text-gray-400">Invert Image (Negative)</label>
+      </div>
+    </div>
+
+    <!-- Accordion 4: Thickness Settings -->
+    <div class="panel-header px-5 py-3 font-bold text-gray-200">4. Thickness Settings (mm)</div>
+    <div class="px-5 py-4 space-y-3 bg-[#222]">
       <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col"><span class="text-[10px] text-gray-500 font-bold mb-1">Width</span><input type="number" id="bmWidth" value="138" class="inset-input rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-customTeal" /></div>
-        <div class="flex flex-col"><span class="text-[10px] text-gray-500 font-bold mb-1">Height</span><input type="number" id="bmHeight" value="46" class="inset-input rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-customTeal" /></div>
-        <div class="flex flex-col"><span class="text-[10px] text-gray-500 font-bold mb-1">Min Z (White)</span><input type="number" id="minThick" value="0.6" step="0.1" class="inset-input rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-customTeal" /></div>
-        <div class="flex flex-col"><span class="text-[10px] text-gray-500 font-bold mb-1">Max Z (Black)</span><input type="number" id="maxThick" value="1.8" step="0.1" class="inset-input rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-customTeal" /></div>
+        <div class="flex flex-col"><span class="text-xs text-gray-500 mb-1">Min Z (White)</span><input type="number" id="minThick" value="0.6" step="0.1" class="bg-[#111] border border-gray-600 rounded px-2 py-1.5 text-center focus:border-customTeal outline-none" /></div>
+        <div class="flex flex-col"><span class="text-xs text-gray-500 mb-1">Max Z (Black)</span><input type="number" id="maxThick" value="1.8" step="0.1" class="bg-[#111] border border-gray-600 rounded px-2 py-1.5 text-center focus:border-customTeal outline-none" /></div>
       </div>
     </div>
 
     <!-- Export -->
-    <div class="mt-auto pt-4">
-      <button id="exportBtn" class="w-full bg-gradient-to-b from-[#1EE5EB] to-[#0d8c90] hover:brightness-110 active:translate-y-[2px] active:shadow-[inset_0_3px_5px_rgba(0,0,0,0.4)] text-[#050505] font-extrabold text-sm py-4 px-4 rounded-xl border border-[#4cf5f9] shadow-[0_5px_15px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.7)] transition-all">
+    <div class="mt-auto p-5 bg-[#1a1a1a] border-t border-gray-700">
+      <button id="exportBtn" class="w-full bg-customTeal hover:bg-teal-400 text-black font-extrabold py-3 px-4 rounded transition-colors shadow-[0_0_10px_rgba(30,229,235,0.3)]">
         EXPORT SOLID STL
       </button>
     </div>
@@ -139,34 +146,35 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
+    // Scene & Viewport
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
-    
-    // Camera setup with Z-axis UP
+    scene.background = new THREE.Color('#050505');
+
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
     camera.up.set(0, 0, 1);
-    camera.position.set(0, -150, 100);
+    camera.position.set(0, -100, 80);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     
-    const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
+    const gridHelper = new THREE.GridHelper(200, 20, 0x333333, 0x111111);
     gridHelper.rotation.x = Math.PI / 2;
     scene.add(gridHelper);
 
-    // Function to generate text labels
+    // Dynamic Axis Helper & Text Generation
     function makeTextSprite(message, color = "rgba(255, 255, 255, 1.0)") {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
-      const fontsize = 32;
+      const fontsize = 48; // High internal resolution for crisp text
       
       context.font = `bold ${fontsize}px Arial`;
       const metrics = context.measureText(message);
-      canvas.width = metrics.width + 10;
-      canvas.height = fontsize + 10;
+      canvas.width = metrics.width + 20;
+      canvas.height = fontsize + 20;
       
       context.font = `bold ${fontsize}px Arial`;
       context.textAlign = "center";
@@ -175,84 +183,112 @@
       context.fillText(message, canvas.width / 2, canvas.height / 2);
       
       const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
       const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false });
       const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(canvas.width * 0.2, canvas.height * 0.2, 1.0);
+      sprite.scale.set(canvas.width * 0.1, canvas.height * 0.1, 1.0);
       return sprite;
     }
 
-    // Offset Axes Marker & Labels
-    const axesOrigin = new THREE.Vector3(-80, -80, 0);
-    const axesHelper = new THREE.AxesHelper(30);
+    const axesOrigin = new THREE.Vector3(-80, -40, 0);
+    const axesHelper = new THREE.AxesHelper(20);
     axesHelper.position.copy(axesOrigin);
     scene.add(axesHelper);
 
-    const labelX = makeTextSprite("X", "rgba(255, 50, 50, 1.0)");
-    labelX.position.set(axesOrigin.x + 35, axesOrigin.y, axesOrigin.z);
+    const labelX = makeTextSprite("X", "#ff4444");
+    labelX.position.set(axesOrigin.x + 25, axesOrigin.y, axesOrigin.z);
     scene.add(labelX);
-
-    const labelY = makeTextSprite("Y", "rgba(50, 255, 50, 1.0)");
-    labelY.position.set(axesOrigin.x, axesOrigin.y + 35, axesOrigin.z);
+    const labelY = makeTextSprite("Y", "#44ff44");
+    labelY.position.set(axesOrigin.x, axesOrigin.y + 25, axesOrigin.z);
     scene.add(labelY);
-
-    const labelZ = makeTextSprite("Z", "rgba(50, 150, 255, 1.0)");
-    labelZ.position.set(axesOrigin.x, axesOrigin.y, axesOrigin.z + 35);
+    const labelZ = makeTextSprite("Z", "#4444ff");
+    labelZ.position.set(axesOrigin.x, axesOrigin.y, axesOrigin.z + 25);
     scene.add(labelZ);
 
-    // Group for dimensions
     let dimensionGroup = new THREE.Group();
     scene.add(dimensionGroup);
 
-    // Lighting
-    scene.add(new THREE.AmbientLight(0x333333));
-    const frontLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    frontLight.position.set(50, 50, 100); 
+    // True Lithophane Lighting Simulation
+    scene.add(new THREE.AmbientLight(0x222222));
+    const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    frontLight.position.set(20, 20, 50); 
     scene.add(frontLight);
 
-    const backLight = new THREE.PointLight(0xffaa55, 0, 200);
-    backLight.position.set(0, 0, -50);
+    const backLight = new THREE.PointLight(0xffeedd, 0, 150);
+    backLight.position.set(0, 0, -20);
     scene.add(backLight);
 
-    let lightActive = false;
-    let material = new THREE.MeshStandardMaterial({ 
+    // MeshPhysicalMaterial simulates sub-surface scattering via transmission
+    let material = new THREE.MeshPhysicalMaterial({ 
       color: 0xffffff, 
-      roughness: 0.5,
-      transparent: true,
-      opacity: 1.0
+      roughness: 0.2,
+      metalness: 0.0,
+      transmission: 1.0, // Glass-like property
+      thickness: 1.5     // Allows light to bleed through thinner parts
     });
 
+    let lightActive = false;
     document.getElementById('toggleLightBtn').addEventListener('click', () => {
       lightActive = !lightActive;
-      backLight.intensity = lightActive ? 5 : 0;
-      frontLight.intensity = lightActive ? 0.2 : 1.5; 
-      material.opacity = lightActive ? 0.85 : 1.0; 
+      backLight.intensity = lightActive ? 15 : 0;
+      frontLight.intensity = lightActive ? 0.1 : 1.0; 
+      material.color.setHex(lightActive ? 0xfff5e6 : 0xffffff); // Warmer when lit
     });
 
+    // Global State
     let currentImage = new Image();
     let currentMesh = null;
+    const fixedWidth = 138;
+    const fixedHeight = 46;
 
+    // Initialization
     currentImage.onload = () => updateMesh();
-    currentImage.onerror = () => {
-      console.warn("Could not load default image. Local CORS issue. Use a local server or GitHub Pages.");
-    };
+    currentImage.onerror = () => { console.warn("Could not load default image (CORS block locally)."); };
     currentImage.src = 'CensorshipIsSo1984-bookmark-main-single.png'; 
 
+    // Inputs
     document.getElementById('imageInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (event) => { 
         const newImg = new Image();
-        newImg.onload = () => {
-          currentImage = newImg;
-          updateMesh();
-        };
+        newImg.onload = () => { currentImage = newImg; updateMesh(); };
         newImg.src = event.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    const rangeInputs = ['imgScale', 'imgOffsetX', 'imgOffsetY', 'imgMidpoint'];
+    document.querySelectorAll('.gallery-img').forEach(img => {
+      img.addEventListener('click', (e) => {
+        const src = e.target.getAttribute('data-src');
+        if (src === 'placeholder_texture') {
+           generateNoiseImage();
+        } else {
+           const newImg = new Image();
+           newImg.onload = () => { currentImage = newImg; updateMesh(); };
+           newImg.src = src;
+        }
+      });
+    });
+
+    function generateNoiseImage() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        const imgData = ctx.createImageData(256, 256);
+        for (let i = 0; i < imgData.data.length; i += 4) {
+            const v = Math.random() * 255;
+            imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = v;
+            imgData.data[i+3] = 255;
+        }
+        ctx.putImageData(imgData, 0, 0);
+        const newImg = new Image();
+        newImg.onload = () => { currentImage = newImg; updateMesh(); };
+        newImg.src = canvas.toDataURL();
+    }
+
+    const rangeInputs = ['imgScale', 'imgOffsetX', 'imgOffsetY', 'imgMidpoint', 'borderMargin'];
     rangeInputs.forEach(id => {
       const el = document.getElementById(id);
       el.addEventListener('input', (e) => {
@@ -260,11 +296,12 @@
         if(id === 'imgOffsetX') document.getElementById('xVal').innerText = e.target.value;
         if(id === 'imgOffsetY') document.getElementById('yVal').innerText = e.target.value;
         if(id === 'imgMidpoint') document.getElementById('midVal').innerText = e.target.value;
+        if(id === 'borderMargin') document.getElementById('marginVal').innerText = e.target.value;
       });
       el.addEventListener('change', () => updateMesh());
     });
 
-    const standardInputs = ['bmWidth', 'bmHeight', 'minThick', 'maxThick', 'invertCheck', 'imageMode'];
+    const standardInputs = ['minThick', 'maxThick', 'invertCheck', 'imageMode'];
     standardInputs.forEach(id => {
       document.getElementById(id).addEventListener('change', () => updateMesh());
     });
@@ -273,8 +310,6 @@
       if (!currentImage.complete || currentImage.naturalWidth === 0) return;
       if (currentMesh) scene.remove(currentMesh);
 
-      const width = parseFloat(document.getElementById('bmWidth').value);
-      const height = parseFloat(document.getElementById('bmHeight').value);
       const minZ = parseFloat(document.getElementById('minThick').value);
       const maxZ = parseFloat(document.getElementById('maxThick').value);
       const scale = parseFloat(document.getElementById('imgScale').value);
@@ -283,15 +318,19 @@
       const gamma = parseFloat(document.getElementById('imgMidpoint').value);
       const invert = document.getElementById('invertCheck').checked;
       const mode = document.getElementById('imageMode').value;
+      const marginMM = parseFloat(document.getElementById('borderMargin').value);
 
-      const resX = Math.round(width * 2);
-      const resY = Math.round(height * 2);
+      const resX = Math.round(fixedWidth * 2);
+      const resY = Math.round(fixedHeight * 2);
+      const marginPxX = Math.round((marginMM / fixedWidth) * resX);
+      const marginPxY = Math.round((marginMM / fixedHeight) * resY);
 
       const canvas = document.createElement('canvas');
       canvas.width = resX;
       canvas.height = resY;
       const ctx = canvas.getContext('2d');
       
+      // Fix for White PNGs: Force a white background first so transparency maps to minZ
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, resX, resY);
 
@@ -315,68 +354,65 @@
       ctx.restore();
 
       const imgData = ctx.getImageData(0, 0, resX, resY).data;
-      const geometry = new THREE.BoxGeometry(width, height, maxZ, resX - 1, resY - 1, 1);
+      const geometry = new THREE.BoxGeometry(fixedWidth, fixedHeight, maxZ, resX - 1, resY - 1, 1);
       const pos = geometry.attributes.position;
 
       for (let i = 0; i < pos.count; i++) {
         if (pos.getZ(i) > 0) {
-            const px = Math.round((pos.getX(i) + width / 2) / width * (resX - 1));
-            const py = Math.round((-pos.getY(i) + height / 2) / height * (resY - 1));
-            const pxIdx = (py * resX + px) * 4;
+            const px = Math.round((pos.getX(i) + fixedWidth / 2) / fixedWidth * (resX - 1));
+            const py = Math.round((-pos.getY(i) + fixedHeight / 2) / fixedHeight * (resY - 1));
             
-            const r = imgData[pxIdx] !== undefined ? imgData[pxIdx] : 255;
-            const g = imgData[pxIdx + 1] !== undefined ? imgData[pxIdx + 1] : 255;
-            const b = imgData[pxIdx + 2] !== undefined ? imgData[pxIdx + 2] : 255;
-            
-            let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-            if (invert) lum = 1.0 - lum;
-            lum = Math.pow(lum, gamma);
-            
-            const z = maxZ - lum * (maxZ - minZ);
-            pos.setZ(i, z);
+            // Enforce Margin
+            if (px < marginPxX || px >= resX - marginPxX || py < marginPxY || py >= resY - marginPxY) {
+                pos.setZ(i, maxZ);
+            } else {
+                const pxIdx = (py * resX + px) * 4;
+                const r = imgData[pxIdx] !== undefined ? imgData[pxIdx] : 255;
+                const g = imgData[pxIdx + 1] !== undefined ? imgData[pxIdx + 1] : 255;
+                const b = imgData[pxIdx + 2] !== undefined ? imgData[pxIdx + 2] : 255;
+                
+                let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                if (invert) lum = 1.0 - lum;
+                lum = Math.pow(lum, gamma);
+                
+                const z = maxZ - lum * (maxZ - minZ);
+                pos.setZ(i, z);
+            }
         } else {
             pos.setZ(i, 0);
         }
       }
 
       geometry.computeVertexNormals();
+      material.thickness = maxZ; // Update material thickness for scattering math
       currentMesh = new THREE.Mesh(geometry, material);
       currentMesh.position.z = 0; 
       scene.add(currentMesh);
 
-      // Update Dimensions Markers
+      // Dimensions Overlay
       dimensionGroup.clear();
-
-      const widthLabel = makeTextSprite(`${width} mm`, "rgba(200, 200, 200, 1.0)");
-      widthLabel.position.set(0, -(height / 2) - 10, 0);
+      const widthLabel = makeTextSprite(`${fixedWidth} mm`, "#888888");
+      widthLabel.position.set(0, -(fixedHeight / 2) - 8, 0);
       dimensionGroup.add(widthLabel);
 
-      const heightLabel = makeTextSprite(`${height} mm`, "rgba(200, 200, 200, 1.0)");
-      heightLabel.position.set((width / 2) + 15, 0, 0);
+      const heightLabel = makeTextSprite(`${fixedHeight} mm`, "#888888");
+      heightLabel.position.set((fixedWidth / 2) + 12, 0, 0);
       dimensionGroup.add(heightLabel);
-
-      const thickLabel = makeTextSprite(`Z: ${maxZ} mm`, "rgba(200, 200, 200, 1.0)");
-      thickLabel.position.set((width / 2) + 15, (height / 2) + 10, maxZ);
-      dimensionGroup.add(thickLabel);
     }
 
     document.getElementById('exportBtn').addEventListener('click', () => {
       if (!currentMesh) return;
-      
       const firstName = prompt("Please enter your first name:");
       if (!firstName || firstName.trim() === "") return; 
-      
       const age = prompt("Please enter your age:");
       if (!age || age.trim() === "") return; 
-
-      const fileName = `${firstName.trim()}_${age.trim()}.stl`;
 
       const exporter = new STLExporter();
       const result = exporter.parse(currentMesh, { binary: true });
       const blob = new Blob([result], { type: 'application/octet-stream' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = fileName;
+      link.download = `${firstName.trim()}_${age.trim()}.stl`;
       link.click();
     });
 
