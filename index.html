@@ -2,16 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Lithophane Bookmark Generator</title>
-  <style>
-    body { font-family: sans-serif; display: flex; margin: 0; height: 100vh; background: #1a1a1a; color: #fff; }
-    #sidebar { width: 320px; padding: 20px; box-sizing: border-box; background: #252525; display: flex; flex-direction: column; gap: 15px; }
-    #viewport { flex: 1; position: relative; }
-    label { font-size: 13px; font-weight: bold; }
-    input, button { padding: 8px; border-radius: 4px; border: none; }
-    button { background: #0077ff; color: #fff; cursor: pointer; font-weight: bold; }
-    button:hover { background: #005fcc; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lithophane Bookmark Maker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            customTeal: '#1EE5EB',
+            customGray: '#292929',
+            customBlack: '#000000',
+          }
+        }
+      }
+    }
+  </script>
   <script type="importmap">
     {
       "imports": {
@@ -21,120 +27,112 @@
     }
   </script>
 </head>
-<body>
-  <div id="sidebar">
-    <h2>Bookmark Maker</h2>
-    <label>1. Select Image</label>
-    <input type="file" id="imageInput" accept="image/*" />
+<body class="bg-customBlack text-white h-screen flex overflow-hidden font-sans">
 
-    <label>2. Bookmark Dimensions (mm)</label>
-    <div>Width: <input type="number" id="bmWidth" value="45" style="width: 50px;"> mm</div>
-    <div>Height: <input type="number" id="bmHeight" value="135" style="width: 50px;"> mm</div>
-
-    <label>3. Lithophane Thickness</label>
-    <div>Min (Light): <input type="number" id="minThick" value="0.8" step="0.1" style="width: 50px;"> mm</div>
-    <div>Max (Dark): <input type="number" id="maxThick" value="2.4" step="0.1" style="width: 50px;"> mm</div>
-
-    <button id="exportBtn">Download Slicer-Ready STL</button>
+  <!-- 3D Viewport -->
+  <div id="viewport" class="flex-1 relative cursor-crosshair">
+    <!-- Viewport overlay controls (like BumpMesh) -->
+    <div class="absolute top-4 left-4 flex gap-2">
+      <button id="toggleLightBtn" class="bg-customGray hover:bg-gray-700 text-white px-3 py-1 rounded text-sm border border-gray-600">
+        Toggle Backlight
+      </button>
+    </div>
   </div>
-  <div id="viewport"></div>
+
+  <!-- Sidebar Control Panel -->
+  <div id="sidebar" class="w-80 bg-customGray p-6 flex flex-col gap-6 overflow-y-auto border-l border-gray-700 shadow-xl">
+    
+    <div>
+      <h2 class="text-xl font-bold tracking-wide text-customTeal mb-1">Bookmark Maker</h2>
+      <p class="text-xs text-gray-400">Banned Book Week</p>
+    </div>
+
+    <!-- Image Setup -->
+    <div class="space-y-2">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">1. Image Source</label>
+      <input type="file" id="imageInput" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-customTeal hover:file:bg-gray-600 cursor-pointer" />
+    </div>
+
+    <!-- Dimensions -->
+    <div class="space-y-3">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">2. Dimensions</label>
+      <div class="flex items-center justify-between">
+        <span class="text-sm">Width (mm)</span>
+        <input type="number" id="bmWidth" value="45" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm">Height (mm)</span>
+        <input type="number" id="bmHeight" value="135" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+      </div>
+    </div>
+
+    <!-- Thickness -->
+    <div class="space-y-3">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">3. Lithophane Depth</label>
+      <div class="flex items-center justify-between">
+        <span class="text-sm">Min / Light (mm)</span>
+        <input type="number" id="minThick" value="0.8" step="0.1" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-sm">Max / Dark (mm)</span>
+        <input type="number" id="maxThick" value="2.4" step="0.1" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="mt-auto pt-4 border-t border-gray-700">
+      <button id="exportBtn" class="w-full bg-customTeal hover:bg-teal-400 text-black font-bold py-3 px-4 rounded transition-colors shadow-lg">
+        Export STL
+      </button>
+    </div>
+  </div>
 
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
-    // 1. Scene Setup
+    // Initialize Scene
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1e1e1e);
+    scene.background = new THREE.Color('#000000'); // Custom Black
 
+    // Camera & Renderer
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, -100, 150);
+    camera.position.set(0, -150, 100);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    const light = new THREE.DirectionalLight(0xffffff, 1.5);
-    light.position.set(0, 0, 50);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x555555));
 
-    let currentMesh = null;
+    // Environment Helpers
+    const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
+    gridHelper.rotation.x = Math.PI / 2; // Align to XY plane
+    scene.add(gridHelper);
 
-    // 2. Image Processing & Mesh Generation
-    document.getElementById('imageInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    const axesHelper = new THREE.AxesHelper(50);
+    scene.add(axesHelper);
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => generateLithophane(img);
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040); 
+    scene.add(ambientLight);
+    
+    const backLight = new THREE.PointLight(0xffffff, 2, 100);
+    backLight.position.set(0, 0, -20); // Positioned behind the model
+    scene.add(backLight);
+
+    let lightActive = true;
+    document.getElementById('toggleLightBtn').addEventListener('click', () => {
+      lightActive = !lightActive;
+      backLight.intensity = lightActive ? 2 : 0;
     });
 
-    function generateLithophane(image) {
-      if (currentMesh) scene.remove(currentMesh);
-
-      const width = parseFloat(document.getElementById('bmWidth').value);
-      const height = parseFloat(document.getElementById('bmHeight').value);
-      const minZ = parseFloat(document.getElementById('minThick').value);
-      const maxZ = parseFloat(document.getElementById('maxThick').value);
-
-      // Downsample grid resolution (1 grid point per mm)
-      const resX = Math.round(width * 2);
-      const resY = Math.round(height * 2);
-
-      const canvas = document.createElement('canvas');
-      canvas.width = resX;
-      canvas.height = resY;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(image, 0, 0, resX, resY);
-      const imgData = ctx.getImageData(0, 0, resX, resY).data;
-
-      // Construct displaced PlaneGeometry
-      const geometry = new THREE.PlaneGeometry(width, height, resX - 1, resY - 1);
-      const pos = geometry.attributes.position;
-
-      for (let i = 0; i < pos.count; i++) {
-        const pxIdx = i * 4;
-        const r = imgData[pxIdx];
-        const g = imgData[pxIdx + 1];
-        const b = imgData[pxIdx + 2];
-        
-        // Luminance calculation
-        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        // Invert luminance: Darker = thicker
-        const z = maxZ - lum * (maxZ - minZ);
-        pos.setZ(i, z);
-      }
-
-      geometry.computeVertexNormals();
-      const material = new THREE.MeshStandardMaterial({ 
-        color: 0xefefef, 
-        roughness: 0.5,
-        side: THREE.DoubleSide 
-      });
-
-      currentMesh = new THREE.Mesh(geometry, material);
-      scene.add(currentMesh);
-    }
-
-    // 3. Export to STL
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      if (!currentMesh) return alert('Upload an image first.');
-      const exporter = new STLExporter();
-      const result = exporter.parse(currentMesh, { binary: true });
-      const blob = new Blob([result], { type: 'application/octet-stream' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'banned_book_bookmark.stl';
-      link.click();
+    // Resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
     });
 
     // Render loop
