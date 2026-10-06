@@ -85,8 +85,8 @@
       <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 drop-shadow-md">1. Image Source</label>
       <input type="file" id="imageInput" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gradient-to-b file:from-[#444] file:to-[#222] file:text-customTeal file:shadow-[0_2px_4px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] hover:file:brightness-110 cursor-pointer" />
       <select id="imageMode" class="w-full inset-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-customTeal mt-2">
-        <option value="fit">Fit (White Borders)</option>
-        <option value="fill">Fill (Crop to Edge)</option>
+        <option value="fit">Mode: Fit (White Borders)</option>
+        <option value="fill">Mode: Fill (Crop to Edge)</option>
       </select>
     </div>
 
@@ -142,7 +142,7 @@
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
     
-    // Setting up the Camera with Z-axis as UP (Fixes orbit roll)
+    // Camera setup with Z-axis UP
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
     camera.up.set(0, 0, 1);
     camera.position.set(0, -150, 100);
@@ -156,8 +156,54 @@
     const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
     gridHelper.rotation.x = Math.PI / 2;
     scene.add(gridHelper);
-    scene.add(new THREE.AxesHelper(50));
 
+    // Function to generate text labels
+    function makeTextSprite(message, color = "rgba(255, 255, 255, 1.0)") {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      const fontsize = 32;
+      
+      context.font = `bold ${fontsize}px Arial`;
+      const metrics = context.measureText(message);
+      canvas.width = metrics.width + 10;
+      canvas.height = fontsize + 10;
+      
+      context.font = `bold ${fontsize}px Arial`;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillStyle = color;
+      context.fillText(message, canvas.width / 2, canvas.height / 2);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(canvas.width * 0.2, canvas.height * 0.2, 1.0);
+      return sprite;
+    }
+
+    // Offset Axes Marker & Labels
+    const axesOrigin = new THREE.Vector3(-80, -80, 0);
+    const axesHelper = new THREE.AxesHelper(30);
+    axesHelper.position.copy(axesOrigin);
+    scene.add(axesHelper);
+
+    const labelX = makeTextSprite("X", "rgba(255, 50, 50, 1.0)");
+    labelX.position.set(axesOrigin.x + 35, axesOrigin.y, axesOrigin.z);
+    scene.add(labelX);
+
+    const labelY = makeTextSprite("Y", "rgba(50, 255, 50, 1.0)");
+    labelY.position.set(axesOrigin.x, axesOrigin.y + 35, axesOrigin.z);
+    scene.add(labelY);
+
+    const labelZ = makeTextSprite("Z", "rgba(50, 150, 255, 1.0)");
+    labelZ.position.set(axesOrigin.x, axesOrigin.y, axesOrigin.z + 35);
+    scene.add(labelZ);
+
+    // Group for dimensions
+    let dimensionGroup = new THREE.Group();
+    scene.add(dimensionGroup);
+
+    // Lighting
     scene.add(new THREE.AmbientLight(0x333333));
     const frontLight = new THREE.DirectionalLight(0xffffff, 1.5);
     frontLight.position.set(50, 50, 100); 
@@ -191,7 +237,6 @@
     };
     currentImage.src = 'CensorshipIsSo1984-bookmark-main-single.png'; 
 
-    // Robust Image Upload Fix
     document.getElementById('imageInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -298,6 +343,21 @@
       currentMesh = new THREE.Mesh(geometry, material);
       currentMesh.position.z = 0; 
       scene.add(currentMesh);
+
+      // Update Dimensions Markers
+      dimensionGroup.clear();
+
+      const widthLabel = makeTextSprite(`${width} mm`, "rgba(200, 200, 200, 1.0)");
+      widthLabel.position.set(0, -(height / 2) - 10, 0);
+      dimensionGroup.add(widthLabel);
+
+      const heightLabel = makeTextSprite(`${height} mm`, "rgba(200, 200, 200, 1.0)");
+      heightLabel.position.set((width / 2) + 15, 0, 0);
+      dimensionGroup.add(heightLabel);
+
+      const thickLabel = makeTextSprite(`Z: ${maxZ} mm`, "rgba(200, 200, 200, 1.0)");
+      thickLabel.position.set((width / 2) + 15, (height / 2) + 10, maxZ);
+      dimensionGroup.add(thickLabel);
     }
 
     document.getElementById('exportBtn').addEventListener('click', () => {
