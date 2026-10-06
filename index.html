@@ -7,15 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            customTeal: '#1EE5EB',
-            customGray: '#292929',
-            customBlack: '#000000',
-          }
-        }
-      }
+      theme: { extend: { colors: { customTeal: '#1EE5EB', customGray: '#292929', customBlack: '#000000' } } }
     }
   </script>
   <script type="importmap">
@@ -29,17 +21,15 @@
 </head>
 <body class="bg-customBlack text-white h-screen flex overflow-hidden font-sans">
 
-  <!-- 3D Viewport -->
   <div id="viewport" class="flex-1 relative cursor-crosshair">
     <div class="absolute top-4 left-4 flex gap-2">
       <button id="toggleLightBtn" class="bg-customGray hover:bg-gray-700 text-white px-3 py-1 rounded text-sm border border-gray-600 shadow">
-        Toggle Backlight
+        Toggle Backlight View
       </button>
     </div>
   </div>
 
-  <!-- Sidebar Control Panel -->
-  <div id="sidebar" class="w-80 bg-customGray p-6 flex flex-col gap-5 overflow-y-auto border-l border-gray-700 shadow-xl">
+  <div id="sidebar" class="w-[340px] bg-customGray p-5 flex flex-col gap-4 overflow-y-auto border-l border-gray-700 shadow-xl">
     
     <div>
       <h2 class="text-xl font-bold tracking-wide text-customTeal mb-1">Bookmark Maker</h2>
@@ -49,59 +39,63 @@
     <!-- Image Setup -->
     <div class="space-y-2">
       <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">1. Image Source</label>
-      <input type="file" id="imageInput" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-customTeal hover:file:bg-gray-600 cursor-pointer" />
+      <input type="file" id="imageInput" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-700 file:text-customTeal hover:file:bg-gray-600 cursor-pointer" />
+      <select id="imageMode" class="w-full bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm focus:border-customTeal outline-none mt-1">
+        <option value="fit">Mode: Fit (White Borders)</option>
+        <option value="fill">Mode: Fill (Crop to Edge)</option>
+      </select>
     </div>
 
-    <!-- Transform Controls -->
-    <div class="space-y-3 bg-customBlack p-3 rounded border border-gray-700">
-      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">Image Transform</label>
-      
+    <!-- Text Overlay -->
+    <div class="space-y-2 bg-customBlack p-3 rounded border border-gray-700">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">Text Overlay</label>
+      <input type="text" id="customText" placeholder="Enter custom text..." class="w-full bg-customGray border border-gray-600 rounded px-2 py-1 text-sm focus:border-customTeal outline-none mb-2" />
       <div class="flex flex-col gap-1">
-        <div class="flex justify-between text-sm"><span>Scale</span><span id="scaleVal">1.0</span></div>
+        <div class="flex justify-between text-xs"><span>Text Size</span><span id="textSizeVal">40</span></div>
+        <input type="range" id="textSize" min="10" max="150" step="1" value="40" class="w-full accent-customTeal">
+      </div>
+    </div>
+
+    <!-- Transform & Contrast -->
+    <div class="space-y-3 bg-customBlack p-3 rounded border border-gray-700">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">Image Adjustments</label>
+      <div class="flex flex-col gap-1">
+        <div class="flex justify-between text-xs"><span>Scale</span><span id="scaleVal">1.0</span></div>
         <input type="range" id="imgScale" min="0.1" max="3" step="0.1" value="1" class="w-full accent-customTeal">
       </div>
-      
       <div class="flex flex-col gap-1">
-        <div class="flex justify-between text-sm"><span>Offset X</span><span id="xVal">0</span></div>
+        <div class="flex justify-between text-xs"><span>Offset X</span><span id="xVal">0</span></div>
         <input type="range" id="imgOffsetX" min="-100" max="100" step="1" value="0" class="w-full accent-customTeal">
       </div>
-
       <div class="flex flex-col gap-1">
-        <div class="flex justify-between text-sm"><span>Offset Y</span><span id="yVal">0</span></div>
+        <div class="flex justify-between text-xs"><span>Offset Y</span><span id="yVal">0</span></div>
         <input type="range" id="imgOffsetY" min="-100" max="100" step="1" value="0" class="w-full accent-customTeal">
       </div>
-    </div>
-
-    <!-- Dimensions -->
-    <div class="space-y-3">
-      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">2. Dimensions</label>
-      <div class="flex items-center justify-between">
-        <span class="text-sm">Width (mm)</span>
-        <input type="number" id="bmWidth" value="138" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+      <div class="flex flex-col gap-1 mt-2">
+        <div class="flex justify-between text-xs text-customTeal"><span>Midpoint (Contrast)</span><span id="midVal">1.0</span></div>
+        <input type="range" id="imgMidpoint" min="0.1" max="3.0" step="0.1" value="1.0" class="w-full accent-customTeal">
       </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm">Height (mm)</span>
-        <input type="number" id="bmHeight" value="46" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+      <div class="flex items-center gap-2 mt-2">
+        <input type="checkbox" id="invertCheck" class="accent-customTeal w-4 h-4 cursor-pointer">
+        <label for="invertCheck" class="text-xs cursor-pointer">Invert Image (Negative)</label>
       </div>
     </div>
 
-    <!-- Thickness -->
-    <div class="space-y-3">
-      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">3. Thickness</label>
-      <div class="flex items-center justify-between">
-        <span class="text-sm">Min (White space)</span>
-        <input type="number" id="minThick" value="0.6" step="0.1" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm">Max (Dark areas)</span>
-        <input type="number" id="maxThick" value="1.8" step="0.1" class="w-16 bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-customTeal" />
+    <!-- Print Settings -->
+    <div class="space-y-2">
+      <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300">2. Print Settings (mm)</label>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex flex-col"><span class="text-[10px] text-gray-400">Width</span><input type="number" id="bmWidth" value="138" class="bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:border-customTeal outline-none" /></div>
+        <div class="flex flex-col"><span class="text-[10px] text-gray-400">Height</span><input type="number" id="bmHeight" value="46" class="bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:border-customTeal outline-none" /></div>
+        <div class="flex flex-col"><span class="text-[10px] text-gray-400">Min Z (White)</span><input type="number" id="minThick" value="0.6" step="0.1" class="bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:border-customTeal outline-none" /></div>
+        <div class="flex flex-col"><span class="text-[10px] text-gray-400">Max Z (Black)</span><input type="number" id="maxThick" value="1.8" step="0.1" class="bg-customBlack border border-gray-600 rounded px-2 py-1 text-sm text-center focus:border-customTeal outline-none" /></div>
       </div>
     </div>
 
     <!-- Export -->
-    <div class="mt-auto pt-4">
+    <div class="mt-auto pt-2">
       <button id="exportBtn" class="w-full bg-customTeal hover:bg-teal-400 text-black font-bold py-3 px-4 rounded transition-colors shadow-lg">
-        Export STL
+        Export Solid STL
       </button>
     </div>
   </div>
@@ -111,7 +105,6 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
-    // 1. Scene Setup
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#000000');
@@ -125,57 +118,76 @@
 
     const controls = new OrbitControls(camera, renderer.domElement);
     
-    // Helpers
     const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
     gridHelper.rotation.x = Math.PI / 2;
     scene.add(gridHelper);
+    scene.add(new THREE.AxesHelper(50));
 
-    const axesHelper = new THREE.AxesHelper(50);
-    scene.add(axesHelper);
+    // Improved Lighting for Lithophane Visibility
+    scene.add(new THREE.AmbientLight(0x333333));
+    
+    const frontLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    frontLight.position.set(50, 50, 100); // Angled to cast shadows on bumps
+    scene.add(frontLight);
 
-    // Lighting
-    scene.add(new THREE.AmbientLight(0x404040));
-    const backLight = new THREE.PointLight(0xffffff, 2, 100);
-    backLight.position.set(0, 0, -20);
+    const backLight = new THREE.PointLight(0xffaa55, 0, 200); // Warm backlight, initially off
+    backLight.position.set(0, 0, -50);
     scene.add(backLight);
 
-    let lightActive = true;
-    document.getElementById('toggleLightBtn').addEventListener('click', () => {
-      lightActive = !lightActive;
-      backLight.intensity = lightActive ? 2 : 0;
+    let lightActive = false;
+    let material = new THREE.MeshStandardMaterial({ 
+      color: 0xffffff, 
+      roughness: 0.5,
+      transparent: true,
+      opacity: 1.0
     });
 
-    // 2. Global State
+    document.getElementById('toggleLightBtn').addEventListener('click', () => {
+      lightActive = !lightActive;
+      backLight.intensity = lightActive ? 5 : 0;
+      frontLight.intensity = lightActive ? 0.2 : 1.5; // Dim front light when backlit
+      material.opacity = lightActive ? 0.85 : 1.0; // Make slightly translucent to simulate glow
+    });
+
     let currentImage = new Image();
     let currentMesh = null;
 
-    // Load Default Image
     currentImage.onload = () => updateMesh();
-    currentImage.src = 'CensorshipIsSo1984-bookmark-main-single.png'; // Must be in the same folder
+    currentImage.onerror = () => {
+      console.warn("Could not load default image. If running locally, this is due to browser CORS security. Use a local server or GitHub Pages.");
+    };
+    currentImage.src = 'CensorshipIsSo1984-bookmark-main-single.png'; 
 
-    // Image Upload
     document.getElementById('imageInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (event) => {
-        currentImage.src = event.target.result;
-      };
+      reader.onload = (event) => { currentImage.src = event.target.result; };
       reader.readAsDataURL(file);
     });
 
-    // Event Listeners for UI
-    const inputs = ['imgScale', 'imgOffsetX', 'imgOffsetY', 'bmWidth', 'bmHeight', 'minThick', 'maxThick'];
-    inputs.forEach(id => {
-      document.getElementById(id).addEventListener('input', (e) => {
+    const rangeInputs = ['imgScale', 'imgOffsetX', 'imgOffsetY', 'imgMidpoint', 'textSize'];
+    rangeInputs.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', (e) => {
         if(id === 'imgScale') document.getElementById('scaleVal').innerText = e.target.value;
         if(id === 'imgOffsetX') document.getElementById('xVal').innerText = e.target.value;
         if(id === 'imgOffsetY') document.getElementById('yVal').innerText = e.target.value;
-        updateMesh();
+        if(id === 'imgMidpoint') document.getElementById('midVal').innerText = e.target.value;
+        if(id === 'textSize') document.getElementById('textSizeVal').innerText = e.target.value;
       });
+      el.addEventListener('change', () => updateMesh());
     });
 
-    // 3. Mesh Generation
+    const standardInputs = ['bmWidth', 'bmHeight', 'minThick', 'maxThick', 'invertCheck', 'imageMode', 'customText'];
+    standardInputs.forEach(id => {
+      document.getElementById(id).addEventListener('change', () => updateMesh());
+    });
+    // Update on text typing delay
+    document.getElementById('customText').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') updateMesh();
+    });
+
     function updateMesh() {
       if (!currentImage.complete || currentImage.naturalWidth === 0) return;
       if (currentMesh) scene.remove(currentMesh);
@@ -184,12 +196,15 @@
       const height = parseFloat(document.getElementById('bmHeight').value);
       const minZ = parseFloat(document.getElementById('minThick').value);
       const maxZ = parseFloat(document.getElementById('maxThick').value);
-      
       const scale = parseFloat(document.getElementById('imgScale').value);
       const offsetX = parseFloat(document.getElementById('imgOffsetX').value);
       const offsetY = parseFloat(document.getElementById('imgOffsetY').value);
+      const gamma = parseFloat(document.getElementById('imgMidpoint').value);
+      const invert = document.getElementById('invertCheck').checked;
+      const mode = document.getElementById('imageMode').value;
+      const customText = document.getElementById('customText').value;
+      const textSize = parseFloat(document.getElementById('textSize').value);
 
-      // Resolution: 2 vertices per mm for performance on Chromebooks
       const resX = Math.round(width * 2);
       const resY = Math.round(height * 2);
 
@@ -198,44 +213,67 @@
       canvas.height = resY;
       const ctx = canvas.getContext('2d');
       
-      // Fill background with white (minimum thickness)
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, resX, resY);
 
-      // Apply transformations
+      ctx.save();
       ctx.translate(resX / 2 + offsetX, resY / 2 + offsetY);
       ctx.scale(scale, scale);
       
-      // Draw image centered
-      const drawW = resX;
-      const drawH = resX * (currentImage.naturalHeight / currentImage.naturalWidth);
+      const imgAspect = currentImage.naturalWidth / currentImage.naturalHeight;
+      const canvasAspect = resX / resY;
+      let drawW, drawH;
+
+      if (mode === 'fit') {
+        if (imgAspect > canvasAspect) { drawW = resX; drawH = resX / imgAspect; } 
+        else { drawH = resY; drawW = resY * imgAspect; }
+      } else {
+        if (imgAspect > canvasAspect) { drawH = resY; drawW = resY * imgAspect; } 
+        else { drawW = resX; drawH = resX / imgAspect; }
+      }
+      
       ctx.drawImage(currentImage, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.restore();
+
+      if (customText.trim() !== '') {
+        ctx.fillStyle = invert ? '#ffffff' : '#000000'; // Draw black text so it extrudes, or white if inverted
+        ctx.font = `bold ${textSize}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(customText, resX / 2, resY / 2);
+      }
 
       const imgData = ctx.getImageData(0, 0, resX, resY).data;
-
-      // Create displaced geometry
-      const geometry = new THREE.PlaneGeometry(width, height, resX - 1, resY - 1);
+      const geometry = new THREE.BoxGeometry(width, height, maxZ, resX - 1, resY - 1, 1);
       const pos = geometry.attributes.position;
 
       for (let i = 0; i < pos.count; i++) {
-        const pxIdx = i * 4;
-        const r = imgData[pxIdx];
-        const g = imgData[pxIdx + 1];
-        const b = imgData[pxIdx + 2];
-        
-        // Luminance -> Z height
-        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        const z = maxZ - lum * (maxZ - minZ);
-        pos.setZ(i, z);
+        if (pos.getZ(i) > 0) {
+            const px = Math.round((pos.getX(i) + width / 2) / width * (resX - 1));
+            const py = Math.round((-pos.getY(i) + height / 2) / height * (resY - 1));
+            const pxIdx = (py * resX + px) * 4;
+            
+            const r = imgData[pxIdx] !== undefined ? imgData[pxIdx] : 255;
+            const g = imgData[pxIdx + 1] !== undefined ? imgData[pxIdx + 1] : 255;
+            const b = imgData[pxIdx + 2] !== undefined ? imgData[pxIdx + 2] : 255;
+            
+            let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            if (invert) lum = 1.0 - lum;
+            lum = Math.pow(lum, gamma);
+            
+            const z = maxZ - lum * (maxZ - minZ);
+            pos.setZ(i, z);
+        } else {
+            pos.setZ(i, 0);
+        }
       }
 
       geometry.computeVertexNormals();
-      const material = new THREE.MeshStandardMaterial({ color: 0xefefef, roughness: 0.5, side: THREE.DoubleSide });
       currentMesh = new THREE.Mesh(geometry, material);
+      currentMesh.position.z = 0; 
       scene.add(currentMesh);
     }
 
-    // 4. Export
     document.getElementById('exportBtn').addEventListener('click', () => {
       if (!currentMesh) return;
       const exporter = new STLExporter();
