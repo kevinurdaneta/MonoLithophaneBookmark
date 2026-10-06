@@ -208,16 +208,25 @@
     let dimensionGroup = new THREE.Group();
     scene.add(dimensionGroup);
 
-    // True Lithophane Lighting Simulation
-    scene.add(new THREE.AmbientLight(0x222222));
+    // True Lithophane Lighting Simulation (Emissive Fake)
+    scene.add(new THREE.AmbientLight(0x444444));
     const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
     frontLight.position.set(20, 20, 50); 
     scene.add(frontLight);
 
-    const backLight = new THREE.PointLight(0xffeedd, 0, 150);
-    backLight.position.set(0, 0, -20);
-    scene.add(backLight);
+    let material = new THREE.MeshStandardMaterial({ 
+      color: 0xdddddd, 
+      roughness: 0.6,
+      emissive: 0xffeedd, // Warm backlight color
+      emissiveIntensity: 0.0 
+    });
 
+    let lightActive = false;
+    document.getElementById('toggleLightBtn').addEventListener('click', () => {
+      lightActive = !lightActive;
+      frontLight.intensity = lightActive ? 0.1 : 1.0; 
+      material.emissiveIntensity = lightActive ? 1.5 : 0.0; 
+    });
     // MeshPhysicalMaterial simulates sub-surface scattering via transmission
     let material = new THREE.MeshPhysicalMaterial({ 
       color: 0xffffff, 
@@ -354,6 +363,14 @@
       ctx.restore();
 
       const imgData = ctx.getImageData(0, 0, resX, resY).data;
+
+      // Darken the canvas margins so the thick plastic frame doesn't glow
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, resX, marginPxY); 
+      ctx.fillRect(0, resY - marginPxY, resX, marginPxY); 
+      ctx.fillRect(0, 0, marginPxX, resY); 
+      ctx.fillRect(resX - marginPxX, 0, marginPxX, resY); 
+
       const geometry = new THREE.BoxGeometry(fixedWidth, fixedHeight, maxZ, resX - 1, resY - 1, 1);
       const pos = geometry.attributes.position;
 
@@ -362,7 +379,6 @@
             const px = Math.round((pos.getX(i) + fixedWidth / 2) / fixedWidth * (resX - 1));
             const py = Math.round((-pos.getY(i) + fixedHeight / 2) / fixedHeight * (resY - 1));
             
-            // Enforce Margin
             if (px < marginPxX || px >= resX - marginPxX || py < marginPxY || py >= resY - marginPxY) {
                 pos.setZ(i, maxZ);
             } else {
@@ -384,7 +400,13 @@
       }
 
       geometry.computeVertexNormals();
-      material.thickness = maxZ; // Update material thickness for scattering math
+
+      // Apply the image as a glowing texture
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.flipY = true;
+      material.emissiveMap = texture;
+
       currentMesh = new THREE.Mesh(geometry, material);
       currentMesh.position.z = 0; 
       scene.add(currentMesh);
