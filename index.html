@@ -210,7 +210,6 @@
       document.getElementById('warningModal').classList.remove('hidden');
     }
 
-    // --- Content Rendering & Progressive Disclosure ---
     function renderContentZones() {
       const container = document.getElementById('content-zones');
       container.innerHTML = '';
@@ -218,44 +217,47 @@
 
       state.zones.forEach((z, index) => {
         container.innerHTML += `
-          <div class="bg-surface p-8 rounded-3xl border border-[#282828] shadow-lg">
-            <h3 class="font-extrabold text-2xl mb-6">${z.label}</h3>
+          <div class="bg-surface pt-8 rounded-3xl border border-[#282828] shadow-lg overflow-hidden mb-2">
             
-            <!-- Image Upload -->
-            <div class="mb-6">
-              <label class="bg-white text-black text-center font-bold py-3 px-6 rounded-full cursor-pointer hover:bg-gray-200 transition-colors inline-block w-full">
-                <span id="btn-label-${z.id}">Upload Image</span>
-                <input type="file" accept="image/*" id="img-${z.id}" class="hidden">
-              </label>
-              <div id="thumb-container-${z.id}" class="hidden mt-4 bg-base p-4 rounded-2xl border border-[#333]">
-                <p class="text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider text-center">Eyedropper: Click image to pick background color</p>
-                <canvas id="thumb-${z.id}" class="mx-auto rounded-lg cursor-crosshair border border-[#444] max-h-48"></canvas>
+            <div class="px-8 pb-6">
+              <h3 class="font-extrabold text-2xl mb-6">${z.label}</h3>
+              
+              <!-- Image Upload -->
+              <div class="mb-6">
+                <label class="bg-white text-black text-center font-bold py-3 px-6 rounded-full cursor-pointer hover:bg-gray-200 transition-colors inline-block w-full">
+                  <span id="btn-label-${z.id}">Upload Image</span>
+                  <input type="file" accept="image/*" id="img-${z.id}" class="hidden">
+                </label>
+                <div id="thumb-container-${z.id}" class="hidden mt-4 bg-base p-4 rounded-2xl border border-[#333]">
+                  <p class="text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider text-center">Eyedropper: Click image to pick background color</p>
+                  <canvas id="thumb-${z.id}" class="mx-auto rounded-lg cursor-crosshair border border-[#444] max-h-48"></canvas>
+                </div>
               </div>
-            </div>
-            
-            <!-- Image Settings -->
-            <div class="flex gap-4 mb-6">
-              <div class="flex-1">
-                <label class="text-xs text-gray-400 font-bold mb-1 block uppercase">Layout Mode</label>
-                <select id="mode-${z.id}" class="w-full bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none">
-                  <option value="fill">Fill (Crop to edge)</option>
-                  <option value="fit">Fit (White borders)</option>
-                  <option value="stretch">Stretch (Distort)</option>
-                  <option value="center">Center (Actual size)</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-gray-400 font-bold mb-1 block uppercase">Background</label>
-                <input type="color" id="bg-${z.id}" value="#ffffff" class="w-16 h-12 rounded-xl cursor-pointer bg-base border border-[#333] p-1">
+              
+              <!-- Image Settings -->
+              <div class="flex gap-4">
+                <div class="flex-1">
+                  <label class="text-xs text-gray-400 font-bold mb-1 block uppercase">Layout Mode</label>
+                  <select id="mode-${z.id}" class="w-full bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none">
+                    <option value="fill">Fill (Crop to edge)</option>
+                    <option value="fit">Fit (White borders)</option>
+                    <option value="stretch">Stretch (Distort)</option>
+                    <option value="center">Center (Actual size)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400 font-bold mb-1 block uppercase">Background</label>
+                  <input type="color" id="bg-${z.id}" value="#ffffff" class="w-16 h-12 rounded-xl cursor-pointer bg-base border border-[#333] p-1">
+                </div>
               </div>
             </div>
 
             <!-- Advanced Image Controls -->
-            <details class="mb-4 group">
-              <summary class="bg-base border border-[#333] rounded-xl px-5 py-4 font-bold text-sm hover:border-gray-500 transition-colors">
-                <span class="text-accent mr-2">⚙️</span> Advanced Image Controls
+            <details class="group border-t border-[#333]">
+              <summary class="bg-base px-8 py-5 font-bold text-sm hover:bg-[#1a1a1a] transition-colors uppercase tracking-wider text-gray-300">
+                Advanced Image Controls
               </summary>
-              <div class="p-5 border-t border-[#333] bg-[#151515] rounded-b-xl space-y-4">
+              <div class="p-8 border-t border-[#333] bg-[#151515] space-y-4">
                 <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Scale</span><span id="val-scale-${z.id}">1.0</span></div><input type="range" id="scale-${z.id}" min="0.1" max="3" step="0.1" value="1"></div>
                 <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Pan X</span><span id="val-panx-${z.id}">0</span></div><input type="range" id="panx-${z.id}" min="-100" max="100" step="1" value="0"></div>
                 <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Pan Y</span><span id="val-pany-${z.id}">0</span></div><input type="range" id="pany-${z.id}" min="-100" max="100" step="1" value="0"></div>
@@ -266,11 +268,11 @@
             </details>
 
             <!-- Custom Text -->
-            <details class="group">
-              <summary class="bg-base border border-[#333] rounded-xl px-5 py-4 font-bold text-sm hover:border-gray-500 transition-colors">
-                <span class="text-accent mr-2">✍️</span> Add Custom Text
+            <details class="group border-t border-[#333]">
+              <summary class="bg-base px-8 py-5 font-bold text-sm hover:bg-[#1a1a1a] transition-colors uppercase tracking-wider text-gray-300">
+                Add Custom Text
               </summary>
-              <div class="p-5 border-t border-[#333] bg-[#151515] rounded-b-xl space-y-5">
+              <div class="p-8 border-t border-[#333] bg-[#151515] space-y-5">
                 <textarea id="text-${z.id}" rows="2" class="w-full bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none" placeholder="Type here..."></textarea>
                 <div class="grid grid-cols-2 gap-4">
                   <select id="font-${z.id}" class="bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none">${fontOptions}</select>
@@ -307,7 +309,6 @@
                const tCanv = document.getElementById(`thumb-${z.id}`);
                tCont.classList.remove('hidden');
                
-               // Draw thumbnail
                const tCtx = tCanv.getContext('2d');
                const scale = Math.min(300 / img.naturalWidth, 150 / img.naturalHeight);
                tCanv.width = img.naturalWidth * scale;
