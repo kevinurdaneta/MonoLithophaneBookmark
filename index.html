@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lithophane Bookmark Maker</title>
   
-  <!-- Google Fonts API -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@700&family=Cinzel:wght@700&family=Dancing+Script:wght@700&family=Lato:wght@700&family=Lobster&family=Merriweather:wght@700&family=Montserrat:wght@700&family=Open+Sans:wght@700&family=Oswald:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Poppins:wght@700&family=Raleway:wght@700&family=Roboto:wght@700&display=swap" rel="stylesheet">
@@ -13,27 +12,39 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      theme: { extend: { colors: { customTeal: '#1EE5EB', customGray: '#292929', customBlack: '#111111' } } }
+      theme: { 
+        extend: { 
+          colors: { 
+            base: '#121212', 
+            surface: '#181818', 
+            surfaceHover: '#282828',
+            accent: '#1EE5EB' 
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        } 
+      }
     }
   </script>
   <style>
-    body { background-color: #111; color: #ddd; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #1a1a1a; }
-    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+    body { background-color: #121212; color: #ffffff; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #121212; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
     
-    input[type=range] { -webkit-appearance: none; background: #222; border-radius: 4px; height: 6px; border: 1px solid #333; width: 100%; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #1EE5EB; cursor: pointer; }
+    input[type=range] { -webkit-appearance: none; background: #333; border-radius: 99px; height: 6px; width: 100%; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #1EE5EB; cursor: pointer; transition: transform 0.1s; }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
     
-    .tab-btn { padding: 0.75rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; transition: all 0.2s; }
-    .tab-btn.active { border-color: #1EE5EB; color: #1EE5EB; background: rgba(30,229,235,0.05); }
+    .tab-view { display: none; }
+    .tab-view.active { display: flex; }
     
-    .style-card { border: 2px solid #333; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; background: #222; transition: all 0.2s; }
-    .style-card.active { border-color: #1EE5EB; background: rgba(30,229,235,0.1); }
+    .style-card { border: 2px solid #282828; border-radius: 16px; padding: 1.5rem; cursor: pointer; text-align: center; background: #181818; transition: all 0.2s ease; }
+    .style-card:hover { border-color: #444; background: #222; }
+    .style-card.selected { border-color: #1EE5EB; background: rgba(30,229,235,0.05); }
     
-    .hidden-tab { display: none !important; }
-    
-    .font-preview { font-size: 16px; }
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
   </style>
   <script type="importmap">
     {
@@ -44,124 +55,83 @@
     }
   </script>
 </head>
-<body class="h-screen flex flex-col overflow-hidden font-sans text-sm">
+<body class="h-screen flex flex-col overflow-hidden">
 
   <!-- Top Navigation -->
-  <div class="bg-customGray border-b border-gray-800 flex justify-between items-center px-6">
-    <div class="text-customTeal font-bold text-lg tracking-wider py-3">Bookmark Maker</div>
-    <div class="flex" id="tabContainer">
-      <div class="tab-btn active" data-target="tab-style">1. Style</div>
-      <div class="tab-btn" data-target="tab-content">2. Content</div>
-      <div class="tab-btn" data-target="tab-edit">3. Edit & Preview</div>
+  <div class="bg-base border-b border-[#282828] flex justify-between items-center px-8 py-4">
+    <div class="text-accent font-extrabold text-2xl tracking-wide">Bookmark Maker</div>
+    <div class="flex gap-4 font-bold text-sm">
+      <div class="nav-step text-accent" data-step="1">1. Style</div>
+      <div class="nav-step text-gray-500" data-step="2">2. Content</div>
+      <div class="nav-step text-gray-500" data-step="3">3. Preview</div>
     </div>
   </div>
 
-  <!-- Main Content Area -->
-  <div class="flex-1 relative overflow-hidden">
-
-    <!-- TAB 1: STYLE SELECTION -->
-    <div id="tab-style" class="absolute inset-0 p-8 overflow-y-auto flex flex-col items-center">
-      <h2 class="text-2xl font-bold mb-6 text-white">Select Bookmark Shape</h2>
-      <div class="grid grid-cols-3 gap-6 max-w-4xl w-full">
-        <div class="style-card active" data-style="standard">
-          <div class="w-12 h-32 border-2 border-gray-400 mx-auto mb-4 rounded-sm"></div>
-          <h3 class="font-bold text-lg">Standard</h3>
-          <p class="text-xs text-gray-400 mt-2">138mm x 46mm solid rectangle.</p>
-        </div>
-        <div class="style-card" data-style="tassel">
-          <div class="w-12 h-32 border-2 border-gray-400 mx-auto mb-4 rounded-sm relative">
-            <div class="w-2 h-2 rounded-full border border-gray-400 absolute top-1 left-1"></div>
-          </div>
-          <h3 class="font-bold text-lg">Tassel Hole</h3>
-          <p class="text-xs text-gray-400 mt-2">Standard with a 4mm reinforced hole.</p>
-        </div>
-        <div class="style-card" data-style="clip">
-          <div class="w-16 mx-auto mb-4 relative h-32">
-            <div class="w-12 h-12 rounded-full border-2 border-gray-400 mx-auto absolute top-0 left-2 bg-[#222] z-10"></div>
-            <div class="w-8 h-24 border-2 border-gray-400 border-t-0 absolute top-8 left-4 rounded-b-xl">
-              <div class="w-4 h-20 border-2 border-gray-400 border-t-0 absolute top-0 left-1.5 rounded-b-lg"></div>
-            </div>
-          </div>
-          <h3 class="font-bold text-lg">Paperclip</h3>
-          <p class="text-xs text-gray-400 mt-2">Functional clip. Prints flat.</p>
-        </div>
+  <!-- TAB 1: STYLE SELECTION -->
+  <div id="view-style" class="tab-view active flex-1 overflow-y-auto flex-col items-center p-10">
+    <h2 class="text-3xl font-extrabold mb-8">Select Bookmark Shape</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+      <div class="style-card selected" data-style="standard">
+        <div class="w-16 h-40 border-4 border-gray-600 mx-auto mb-6 rounded-md"></div>
+        <h3 class="font-bold text-xl">Standard</h3>
+        <p class="text-sm text-gray-400 mt-2 font-medium">138mm x 46mm solid rectangle.</p>
       </div>
-      <button class="mt-12 bg-customTeal text-black font-bold px-8 py-3 rounded hover:brightness-110 next-tab-btn" data-next="tab-content">Next Step</button>
+      <div class="style-card" data-style="tassel">
+        <div class="w-16 h-40 border-4 border-gray-600 mx-auto mb-6 rounded-md relative">
+          <div class="w-3 h-3 rounded-full border-2 border-gray-600 absolute top-1.5 left-1.5"></div>
+        </div>
+        <h3 class="font-bold text-xl">Tassel Hole</h3>
+        <p class="text-sm text-gray-400 mt-2 font-medium">Standard with a 4mm reinforced hole.</p>
+      </div>
+      <div class="style-card" data-style="clip">
+        <div class="w-20 mx-auto mb-6 relative h-40">
+          <div class="w-16 h-16 rounded-full border-4 border-gray-600 mx-auto absolute top-0 left-2 bg-surface z-10"></div>
+          <div class="w-10 h-32 border-4 border-gray-600 border-t-0 absolute top-8 left-5 rounded-b-xl">
+            <div class="w-4 h-24 border-4 border-gray-600 border-t-0 absolute top-0 left-1 rounded-b-lg"></div>
+          </div>
+        </div>
+        <h3 class="font-bold text-xl">Paperclip</h3>
+        <p class="text-sm text-gray-400 mt-2 font-medium">Functional clip. Prints flat.</p>
+      </div>
+    </div>
+    <button class="mt-12 bg-accent text-black font-extrabold px-12 py-4 rounded-full text-lg hover:scale-105 transition-transform shadow-[0_0_15px_rgba(30,229,235,0.4)]" onclick="goToTab('view-content', 2)">Continue to Content</button>
+  </div>
+
+  <!-- TAB 2: CONTENT SETUP -->
+  <div id="view-content" class="tab-view flex-1 overflow-y-auto flex-col items-center p-8 hidden">
+    <div class="max-w-2xl w-full space-y-6" id="content-zones">
+      <!-- Injected by JS -->
+    </div>
+    <button class="mt-10 mb-20 bg-accent text-black font-extrabold px-12 py-4 rounded-full text-lg hover:scale-105 transition-transform shadow-[0_0_15px_rgba(30,229,235,0.4)]" onclick="goToTab('view-preview', 3)">Generate 3D Preview</button>
+  </div>
+
+  <!-- TAB 3: PREVIEW & EXPORT -->
+  <div id="view-preview" class="tab-view flex-1 relative hidden bg-black">
+    <div id="viewport" class="w-full h-full"></div>
+    
+    <!-- Floating Top Controls -->
+    <div class="absolute top-6 left-6 flex gap-4 z-10">
+      <button class="bg-surface border border-[#333] text-white px-6 py-3 rounded-full font-bold hover:bg-surfaceHover transition-colors shadow-lg" onclick="goToTab('view-content', 2)">← Back to Edit</button>
+      <button id="toggleLightBtn" class="bg-surface border border-[#333] text-white px-6 py-3 rounded-full font-bold hover:bg-surfaceHover transition-colors shadow-lg">Toggle Backlight</button>
     </div>
 
-    <!-- TAB 2: CONTENT SETUP -->
-    <div id="tab-content" class="absolute inset-0 p-8 overflow-y-auto flex flex-col items-center hidden-tab">
-      <div class="max-w-2xl w-full space-y-6" id="content-zones">
-        <!-- Zones injected by JS -->
+    <!-- Massive Export Button Overlay -->
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center bg-base/80 p-6 rounded-3xl backdrop-blur-md border border-[#333] shadow-2xl">
+      <div class="flex items-center gap-4 mb-4 w-full">
+        <span class="text-sm font-bold text-gray-300 whitespace-nowrap">Export Quality (mm/px):</span>
+        <input type="range" id="adj-res" min="0.1" max="0.5" step="0.05" value="0.2" class="w-48">
+        <span id="val-res" class="text-sm font-bold w-8">0.2</span>
       </div>
-      <button class="mt-8 bg-customTeal text-black font-bold px-8 py-3 rounded hover:brightness-110 next-tab-btn" data-next="tab-edit">Next Step</button>
-    </div>
-
-    <!-- TAB 3: EDIT & PREVIEW -->
-    <div id="tab-edit" class="absolute inset-0 flex hidden-tab">
-      <!-- Sidebar Controls -->
-      <div class="w-[360px] bg-customGray border-r border-gray-800 flex flex-col overflow-y-auto">
-        
-        <div class="p-4 border-b border-gray-800 bg-[#222]">
-          <h3 class="font-bold text-customTeal mb-3">Image Adjustments</h3>
-          <div class="space-y-3">
-            <div class="flex justify-between text-xs"><span>Scale</span><span id="val-scale">1.0</span></div>
-            <input type="range" id="adj-scale" min="0.1" max="3" step="0.1" value="1">
-            
-            <div class="flex justify-between text-xs"><span>Pan X</span><span id="val-panx">0</span></div>
-            <input type="range" id="adj-panx" min="-100" max="100" step="1" value="0">
-            
-            <div class="flex justify-between text-xs"><span>Pan Y</span><span id="val-pany">0</span></div>
-            <input type="range" id="adj-pany" min="-100" max="100" step="1" value="0">
-
-            <div class="flex justify-between text-xs text-customTeal mt-4"><span>Midpoint (Contrast)</span><span id="val-mid">1.0</span></div>
-            <input type="range" id="adj-mid" min="0.1" max="3.0" step="0.1" value="1.0">
-            
-            <div class="flex justify-between text-xs"><span>Highlights</span><span id="val-high">0</span></div>
-            <input type="range" id="adj-high" min="-50" max="50" step="1" value="0">
-            
-            <div class="flex justify-between text-xs"><span>Shadows</span><span id="val-shadow">0</span></div>
-            <input type="range" id="adj-shadow" min="-50" max="50" step="1" value="0">
-          </div>
-        </div>
-
-        <div class="p-4 border-b border-gray-800">
-          <h3 class="font-bold text-customTeal mb-3">Text Position & 3D Extrusion</h3>
-          <div class="space-y-3">
-            <div class="flex justify-between text-xs"><span>Text Thick Override (Z mm)</span><span id="val-textz">1.8</span></div>
-            <input type="range" id="adj-textz" min="0.6" max="2.4" step="0.1" value="1.8">
-            
-            <div class="flex justify-between text-xs mt-3"><span>Text X</span><span id="val-textx">0</span></div>
-            <input type="range" id="adj-textx" min="-100" max="100" step="1" value="0">
-            
-            <div class="flex justify-between text-xs"><span>Text Y</span><span id="val-texty">0</span></div>
-            <input type="range" id="adj-texty" min="-100" max="100" step="1" value="0">
-          </div>
-        </div>
-
-        <div class="p-4 bg-[#1a1a1a] mt-auto">
-          <h3 class="font-bold text-gray-400 mb-3 text-xs uppercase">Export Settings</h3>
-          <div class="flex justify-between text-xs mb-1"><span>Target Resolution (mm/px)</span><span id="val-res">0.20</span></div>
-          <input type="range" id="adj-res" min="0.1" max="0.5" step="0.05" value="0.2">
-          <p class="text-[10px] text-gray-500 mt-1 mb-4">Lower = Higher Quality / Slower Export.</p>
-          <button id="exportBtn" class="w-full bg-customTeal text-black font-bold py-3 rounded hover:brightness-110">Export STL</button>
-        </div>
-      </div>
-
-      <!-- 3D Viewport -->
-      <div id="viewport" class="flex-1 relative bg-black">
-         <button id="updatePreviewBtn" class="absolute top-4 left-4 bg-gray-800 text-white px-4 py-2 rounded border border-gray-600 shadow z-10 hover:bg-gray-700 font-bold">Refresh 3D Preview</button>
-         <button id="toggleLightBtn" class="absolute top-4 left-44 bg-gray-800 text-white px-4 py-2 rounded border border-gray-600 shadow z-10 hover:bg-gray-700">Toggle Light</button>
-      </div>
+      <button id="exportBtn" class="w-full bg-accent text-black font-extrabold text-2xl py-5 px-16 rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(30,229,235,0.4)]">EXPORT STL FILE</button>
     </div>
   </div>
 
-  <!-- Modals -->
-  <div id="warningModal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center hidden">
-    <div class="bg-customGray border border-gray-700 p-6 rounded max-w-sm text-center">
-      <h3 class="text-xl font-bold text-red-400 mb-2" id="warningTitle">Notice</h3>
-      <p class="text-sm text-gray-300 mb-4" id="warningMsg">Message here.</p>
-      <button class="bg-gray-700 px-6 py-2 rounded hover:bg-gray-600 font-bold" onclick="document.getElementById('warningModal').classList.add('hidden')">Okay</button>
+  <!-- Warning Modal -->
+  <div id="warningModal" class="fixed inset-0 bg-black/90 z-50 flex justify-center items-center hidden backdrop-blur-sm">
+    <div class="bg-surface border border-[#333] p-8 rounded-3xl max-w-md text-center shadow-2xl">
+      <h3 class="text-2xl font-extrabold text-red-400 mb-3" id="warningTitle">Notice</h3>
+      <p class="text-base text-gray-300 mb-8 font-medium leading-relaxed" id="warningMsg">Message</p>
+      <button class="bg-white text-black px-8 py-3 rounded-full font-extrabold hover:bg-gray-200 transition-colors w-full" onclick="document.getElementById('warningModal').classList.add('hidden')">Got it</button>
     </div>
   </div>
 
@@ -179,41 +149,56 @@
     ];
 
     let state = {
-      style: 'standard', // standard, tassel, clip
+      style: 'standard',
       zones: [{
-        id: 'main', label: 'Image Content', imgObj: null, mode: 'fill', bgColor: '#ffffff',
-        text: '', font: 'Roboto', size: 30, align: 'center', lh: 1.2
+        id: 'main', label: 'Bookmark Design', imgObj: null, mode: 'fill', bgColor: '#ffffff',
+        text: '', font: 'Roboto', size: 30, align: 'center',
+        scale: 1, panx: 0, pany: 0, mid: 1.0, high: 0, shadow: 0, textz: 1.8, textx: 0, texty: 0
       }],
-      adj: { scale: 1, panx: 0, pany: 0, mid: 1.0, high: 0, shadow: 0, textz: 1.8, textx: 0, texty: 0, res: 0.2 }
+      res: 0.2
     };
 
-    // UI Tab Navigation
-    document.querySelectorAll('.tab-btn, .next-tab-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        let target = e.target.getAttribute('data-target') || e.target.getAttribute('data-next');
-        document.querySelectorAll('#tab-style, #tab-content, #tab-edit').forEach(el => el.classList.add('hidden-tab'));
-        document.getElementById(target).classList.remove('hidden-tab');
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-        let correspondingTab = document.querySelector(`.tab-btn[data-target="${target}"]`);
-        if(correspondingTab) correspondingTab.classList.add('active');
-        if(target === 'tab-edit') updateMeshPreview();
+    // --- Navigation Logic ---
+    window.goToTab = function(targetId, stepNum) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active');
+      
+      document.querySelectorAll('.nav-step').forEach(el => {
+        el.classList.remove('text-accent');
+        el.classList.add('text-gray-500');
+        if (parseInt(el.getAttribute('data-step')) <= stepNum) {
+          el.classList.add('text-accent');
+          el.classList.remove('text-gray-500');
+        }
       });
-    });
 
-    // Style Selection
+      if (targetId === 'view-preview') {
+        // Force Three.js to recalculate dimensions now that container is visible
+        setTimeout(() => {
+          const w = container.clientWidth;
+          const h = container.clientHeight;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+          processCanvasAndMesh(false);
+        }, 50);
+      }
+    };
+
+    // --- Style Selection ---
     document.querySelectorAll('.style-card').forEach(card => {
       card.addEventListener('click', () => {
-        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active', 'border-customTeal'));
-        card.classList.add('active', 'border-customTeal');
+        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
         state.style = card.getAttribute('data-style');
         
-        if(state.style === 'clip') {
+        if (state.style === 'clip') {
           state.zones = [
-            { id: 'top', label: 'Top Circle (46mm)', imgObj: null, mode: 'fill', bgColor: '#ffffff', text: '', font: 'Roboto', size: 30, align: 'center', lh: 1.2 },
-            { id: 'bottom', label: 'Bottom Body (30mm)', imgObj: null, mode: 'fill', bgColor: '#ffffff', text: '', font: 'Roboto', size: 30, align: 'center', lh: 1.2 }
+            { id: 'top', label: 'Top Circle (46mm)', imgObj: null, mode: 'fill', bgColor: '#ffffff', text: '', font: 'Roboto', size: 30, align: 'center', scale: 1, panx: 0, pany: 0, mid: 1.0, high: 0, shadow: 0, textz: 1.8, textx: 0, texty: 0 },
+            { id: 'bottom', label: 'Bottom Clip (30mm)', imgObj: null, mode: 'fill', bgColor: '#ffffff', text: '', font: 'Roboto', size: 30, align: 'center', scale: 1, panx: 0, pany: 0, mid: 1.0, high: 0, shadow: 0, textz: 1.8, textx: 0, texty: 0 }
           ];
         } else {
-          state.zones = [{ id: 'main', label: 'Bookmark Content', imgObj: null, mode: 'fill', bgColor: '#ffffff', text: '', font: 'Roboto', size: 30, align: 'center', lh: 1.2 }];
+          state.zones = [{ id: 'main', label: 'Bookmark Design', imgObj: null, mode: 'fill', bgColor: '#ffffff', text: '', font: 'Roboto', size: 30, align: 'center', scale: 1, panx: 0, pany: 0, mid: 1.0, high: 0, shadow: 0, textz: 1.8, textx: 0, texty: 0 }];
         }
         renderContentZones();
       });
@@ -225,6 +210,7 @@
       document.getElementById('warningModal').classList.remove('hidden');
     }
 
+    // --- Content Rendering & Progressive Disclosure ---
     function renderContentZones() {
       const container = document.getElementById('content-zones');
       container.innerHTML = '';
@@ -232,42 +218,81 @@
 
       state.zones.forEach((z, index) => {
         container.innerHTML += `
-          <div class="bg-[#222] p-5 rounded border border-gray-700">
-            <h3 class="font-bold text-customTeal mb-4 text-lg border-b border-gray-800 pb-2">${z.label}</h3>
+          <div class="bg-surface p-8 rounded-3xl border border-[#282828] shadow-lg">
+            <h3 class="font-extrabold text-2xl mb-6">${z.label}</h3>
             
-            <label class="block text-xs font-bold text-gray-400 mb-1">Image Upload</label>
-            <input type="file" accept="image/*" id="img-${z.id}" class="w-full text-xs text-gray-400 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-gray-700 file:text-white cursor-pointer mb-2">
+            <!-- Image Upload -->
+            <div class="mb-6">
+              <label class="bg-white text-black text-center font-bold py-3 px-6 rounded-full cursor-pointer hover:bg-gray-200 transition-colors inline-block w-full">
+                <span id="btn-label-${z.id}">Upload Image</span>
+                <input type="file" accept="image/*" id="img-${z.id}" class="hidden">
+              </label>
+              <div id="thumb-container-${z.id}" class="hidden mt-4 bg-base p-4 rounded-2xl border border-[#333]">
+                <p class="text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider text-center">Eyedropper: Click image to pick background color</p>
+                <canvas id="thumb-${z.id}" class="mx-auto rounded-lg cursor-crosshair border border-[#444] max-h-48"></canvas>
+              </div>
+            </div>
             
-            <div class="flex gap-2 mb-4">
-              <select id="mode-${z.id}" class="flex-1 bg-[#111] border border-gray-600 rounded px-2 py-1.5 focus:border-customTeal outline-none">
-                <option value="fill">Fill (Crop to bounds)</option>
-                <option value="fit">Fit (Show full image)</option>
-                <option value="stretch">Stretch (Distort to fill)</option>
-                <option value="center">Center (Actual size)</option>
-              </select>
-              <input type="color" id="bg-${z.id}" value="#ffffff" class="w-10 h-8 rounded cursor-pointer bg-transparent border-0 p-0" title="Background Color for Fit/Center">
+            <!-- Image Settings -->
+            <div class="flex gap-4 mb-6">
+              <div class="flex-1">
+                <label class="text-xs text-gray-400 font-bold mb-1 block uppercase">Layout Mode</label>
+                <select id="mode-${z.id}" class="w-full bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none">
+                  <option value="fill">Fill (Crop to edge)</option>
+                  <option value="fit">Fit (White borders)</option>
+                  <option value="stretch">Stretch (Distort)</option>
+                  <option value="center">Center (Actual size)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 font-bold mb-1 block uppercase">Background</label>
+                <input type="color" id="bg-${z.id}" value="#ffffff" class="w-16 h-12 rounded-xl cursor-pointer bg-base border border-[#333] p-1">
+              </div>
             </div>
 
-            <label class="block text-xs font-bold text-gray-400 mb-1 mt-4">Custom Text</label>
-            <textarea id="text-${z.id}" rows="2" class="w-full bg-[#111] border border-gray-600 rounded px-2 py-1.5 focus:border-customTeal outline-none mb-2" placeholder="Enter text here..."></textarea>
-            
-            <div class="grid grid-cols-2 gap-2">
-              <select id="font-${z.id}" class="w-full bg-[#111] border border-gray-600 rounded px-2 py-1 focus:border-customTeal outline-none">${fontOptions}</select>
-              <select id="align-${z.id}" class="w-full bg-[#111] border border-gray-600 rounded px-2 py-1 focus:border-customTeal outline-none">
-                <option value="center">Center Align</option>
-                <option value="left">Left Align</option>
-                <option value="right">Right Align</option>
-              </select>
-            </div>
-            <div class="flex items-center gap-2 mt-2">
-               <span class="text-xs text-gray-400">Size:</span>
-               <input type="range" id="size-${z.id}" min="10" max="100" value="30" class="flex-1">
-            </div>
+            <!-- Advanced Image Controls -->
+            <details class="mb-4 group">
+              <summary class="bg-base border border-[#333] rounded-xl px-5 py-4 font-bold text-sm hover:border-gray-500 transition-colors">
+                <span class="text-accent mr-2">⚙️</span> Advanced Image Controls
+              </summary>
+              <div class="p-5 border-t border-[#333] bg-[#151515] rounded-b-xl space-y-4">
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Scale</span><span id="val-scale-${z.id}">1.0</span></div><input type="range" id="scale-${z.id}" min="0.1" max="3" step="0.1" value="1"></div>
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Pan X</span><span id="val-panx-${z.id}">0</span></div><input type="range" id="panx-${z.id}" min="-100" max="100" step="1" value="0"></div>
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Pan Y</span><span id="val-pany-${z.id}">0</span></div><input type="range" id="pany-${z.id}" min="-100" max="100" step="1" value="0"></div>
+                <div class="flex flex-col gap-2 mt-4"><div class="flex justify-between text-xs font-bold text-accent"><span>Midpoint (Contrast)</span><span id="val-mid-${z.id}">1.0</span></div><input type="range" id="mid-${z.id}" min="0.1" max="3.0" step="0.1" value="1.0"></div>
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Highlights</span><span id="val-high-${z.id}">0</span></div><input type="range" id="high-${z.id}" min="-50" max="50" step="1" value="0"></div>
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Shadows</span><span id="val-shadow-${z.id}">0</span></div><input type="range" id="shadow-${z.id}" min="-50" max="50" step="1" value="0"></div>
+              </div>
+            </details>
+
+            <!-- Custom Text -->
+            <details class="group">
+              <summary class="bg-base border border-[#333] rounded-xl px-5 py-4 font-bold text-sm hover:border-gray-500 transition-colors">
+                <span class="text-accent mr-2">✍️</span> Add Custom Text
+              </summary>
+              <div class="p-5 border-t border-[#333] bg-[#151515] rounded-b-xl space-y-5">
+                <textarea id="text-${z.id}" rows="2" class="w-full bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none" placeholder="Type here..."></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                  <select id="font-${z.id}" class="bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none">${fontOptions}</select>
+                  <select id="align-${z.id}" class="bg-base border border-[#333] rounded-xl px-4 py-3 font-bold focus:border-accent outline-none">
+                    <option value="center">Center Align</option>
+                    <option value="left">Left Align</option>
+                    <option value="right">Right Align</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Text Size</span><span id="val-size-${z.id}">30</span></div><input type="range" id="size-${z.id}" min="10" max="100" value="30"></div>
+                <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Text Thickness (Z mm)</span><span id="val-textz-${z.id}">1.8</span></div><input type="range" id="textz-${z.id}" min="0.6" max="2.4" step="0.1" value="1.8"></div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Move X</span><span id="val-textx-${z.id}">0</span></div><input type="range" id="textx-${z.id}" min="-100" max="100" step="1" value="0"></div>
+                  <div class="flex flex-col gap-2"><div class="flex justify-between text-xs font-bold text-gray-400"><span>Move Y</span><span id="val-texty-${z.id}">0</span></div><input type="range" id="texty-${z.id}" min="-100" max="100" step="1" value="0"></div>
+                </div>
+              </div>
+            </details>
           </div>
         `;
       });
 
-      // Bind events
+      // Bind Events
       state.zones.forEach((z, index) => {
         document.getElementById(`img-${z.id}`).addEventListener('change', (e) => {
           const file = e.target.files[0];
@@ -277,53 +302,80 @@
             const img = new Image();
             img.onload = () => {
                state.zones[index].imgObj = img; 
-               if(state.style === 'clip') showWarning("Complexity Check", "This style must print flat. Images with too many distinct shades may print poorly. High contrast graphics are recommended.");
+               document.getElementById(`btn-label-${z.id}`).innerText = "Replace Image";
+               const tCont = document.getElementById(`thumb-container-${z.id}`);
+               const tCanv = document.getElementById(`thumb-${z.id}`);
+               tCont.classList.remove('hidden');
+               
+               // Draw thumbnail
+               const tCtx = tCanv.getContext('2d');
+               const scale = Math.min(300 / img.naturalWidth, 150 / img.naturalHeight);
+               tCanv.width = img.naturalWidth * scale;
+               tCanv.height = img.naturalHeight * scale;
+               tCtx.drawImage(img, 0, 0, tCanv.width, tCanv.height);
+               
+               if(state.style === 'clip') showWarning("Resolution Check", "The Paperclip style prints flat on the bed. Images with extremely complex shading may not resolve well. High contrast graphics work best.");
             };
             img.src = ev.target.result;
           };
           r.readAsDataURL(file);
         });
 
+        // Eyedropper Logic
+        document.getElementById(`thumb-${z.id}`).addEventListener('mousedown', (e) => {
+          const rect = e.target.getBoundingClientRect();
+          const x = Math.floor((e.clientX - rect.left) * (e.target.width / rect.width));
+          const y = Math.floor((e.clientY - rect.top) * (e.target.height / rect.height));
+          const ctx = e.target.getContext('2d');
+          const p = ctx.getImageData(x, y, 1, 1).data;
+          const hex = "#" + ("000000" + ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16)).slice(-6);
+          document.getElementById(`bg-${z.id}`).value = hex;
+          state.zones[index].bgColor = hex;
+        });
+
+        // Bind standard inputs
         ['mode', 'bg', 'text', 'font', 'align'].forEach(key => {
           document.getElementById(`${key}-${z.id}`).addEventListener('change', (e) => {
             state.zones[index][key] = e.target.value;
             if(key === 'font' && fonts.find(f => f.name === e.target.value).type === 'script') {
-               showWarning("Font Thickness", "Script fonts can be very thin. Please ensure the lines look thick enough for a 0.4mm nozzle in the 3D preview.");
+               showWarning("Font Thickness", "Script fonts can have very thin lines. Ensure they appear thick enough for a 0.4mm nozzle in the 3D preview.");
             }
           });
         });
-        
         document.getElementById(`text-${z.id}`).addEventListener('input', (e) => state.zones[index].text = e.target.value);
-        document.getElementById(`size-${z.id}`).addEventListener('input', (e) => state.zones[index].size = parseInt(e.target.value));
+        
+        // Bind range sliders
+        ['scale', 'panx', 'pany', 'mid', 'high', 'shadow', 'textz', 'textx', 'texty', 'size'].forEach(key => {
+          const el = document.getElementById(`${key}-${z.id}`);
+          el.addEventListener('input', (e) => {
+            state.zones[index][key] = parseFloat(e.target.value);
+            document.getElementById(`val-${key}-${z.id}`).innerText = e.target.value;
+          });
+        });
       });
     }
 
-    // Initialize content tab
     renderContentZones();
 
-    // Bind Edit Sliders
-    Object.keys(state.adj).forEach(key => {
-      const el = document.getElementById(`adj-${key}`);
-      if(el) {
-        el.addEventListener('input', (e) => {
-          state.adj[key] = parseFloat(e.target.value);
-          document.getElementById(`val-${key}`).innerText = e.target.value;
-        });
-      }
+    // Bind Global Res Slider
+    document.getElementById('adj-res').addEventListener('input', (e) => {
+      state.res = parseFloat(e.target.value);
+      document.getElementById('val-res').innerText = e.target.value;
     });
 
-    // Three.js Setup
+    // --- Three.js Setup ---
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#050505');
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    scene.background = new THREE.Color('#111111');
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.up.set(0, 0, 1);
     camera.position.set(0, -200, 150);
+    
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
     const controls = new OrbitControls(camera, renderer.domElement);
-    scene.add(new THREE.GridHelper(300, 30, 0x333333, 0x111111));
+    scene.add(new THREE.GridHelper(300, 30, 0x282828, 0x181818));
 
     const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
     frontLight.position.set(20, 20, 50); 
@@ -339,15 +391,13 @@
     });
 
     let currentMesh = null;
-    const pxToMm = 46 / 46; // Ratio standard
 
     function processCanvasAndMesh(exportMode = false) {
       if (currentMesh) scene.remove(currentMesh);
       const widthMm = 46;
       const heightMm = 138;
       
-      // Calculate resolution. UI slider is mm/px.
-      const resolution = exportMode ? state.adj.res : 0.4; // Force fast 0.4 preview if not exporting
+      const resolution = exportMode ? state.res : 0.4; // Fast preview
       const resX = Math.round(widthMm / resolution);
       const resY = Math.round(heightMm / resolution);
 
@@ -357,18 +407,16 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, resX, resY);
 
-      // Math Helpers to map physical mm to canvas px
-      const getPx = (mm) => Math.round((mm / widthMm) * resX);
       const getPy = (mm) => Math.round((mm / heightMm) * resY);
 
       // Draw Zones
-      state.zones.forEach((z, i) => {
+      state.zones.forEach((z) => {
         let zHeight = resY;
         let yOffset = 0;
         
         if (state.style === 'clip') {
-           if(z.id === 'top') { zHeight = getPy(46); yOffset = getPy(138-46); } // top 46mm
-           if(z.id === 'bottom') { zHeight = getPy(92); yOffset = 0; } // bottom 92mm
+           if(z.id === 'top') { zHeight = getPy(46); yOffset = getPy(138-46); } 
+           if(z.id === 'bottom') { zHeight = getPy(92); yOffset = 0; }
         }
 
         ctx.save();
@@ -393,34 +441,34 @@
              dw = z.imgObj.naturalWidth; dh = z.imgObj.naturalHeight;
            }
            
-           // Apply adjustments
-           ctx.translate(resX/2 + state.adj.panx, yOffset + zHeight/2 + state.adj.pany);
-           ctx.scale(state.adj.scale, state.adj.scale);
+           ctx.translate(resX/2 + z.panx, yOffset + zHeight/2 + z.pany);
+           ctx.scale(z.scale, z.scale);
            ctx.drawImage(z.imgObj, -dw/2, -dh/2, dw, dh);
            ctx.restore();
         }
         ctx.restore();
       });
 
-      // Fetch for Image processing
+      // Filter Image Data
       let imgDataObj = ctx.getImageData(0,0,resX,resY);
       let data = imgDataObj.data;
+      
+      // We apply settings from the 'main' or 'top' zone globally to keep it simple, 
+      // or strictly map zone bounds. To prevent looping complexity, use zone 0 settings for global image adjust.
+      let zRef = state.zones[0];
       
       for(let i=0; i<data.length; i+=4) {
          let r = data[i], g = data[i+1], b = data[i+2];
          let lum = (0.299 * r + 0.587 * g + 0.114 * b);
-         
-         // Apply Highlights/Shadows
-         if(lum > 178) lum += state.adj.high;
-         if(lum < 76) lum -= state.adj.shadow;
+         if(lum > 178) lum += zRef.high;
+         if(lum < 76) lum -= zRef.shadow;
          lum = Math.max(0, Math.min(255, lum));
-         
          data[i] = data[i+1] = data[i+2] = lum;
       }
       ctx.putImageData(imgDataObj, 0, 0);
 
-      // Draw Text OVER processed image (so text ignores contrast/highlights)
-      state.zones.forEach((z, i) => {
+      // Draw Text
+      state.zones.forEach((z) => {
          if(!z.text) return;
          let zHeight = resY;
          let yOffset = 0;
@@ -429,10 +477,9 @@
            if(z.id === 'bottom') { zHeight = getPy(92); yOffset = 0; }
          }
          
-         ctx.fillStyle = '#000000'; // Text represents max thickness
+         ctx.fillStyle = '#000000'; // Marker color for math overrides
          ctx.textAlign = z.align;
          ctx.textBaseline = 'middle';
-         // Scale font size visually 
          ctx.font = `bold ${z.size * (resX/500)}px '${z.font}'`;
          
          const lines = z.text.split('\n');
@@ -444,35 +491,32 @@
          if(z.align === 'right') cx = resX - 10;
 
          lines.forEach((line, idx) => {
-             ctx.fillText(line, cx + state.adj.textx, startY + (idx*lineHeight) + state.adj.texty);
+             ctx.fillText(line, cx + z.textx, startY + (idx*lineHeight) + z.texty);
          });
       });
 
       const finalData = ctx.getImageData(0,0,resX,resY).data;
       
-      // Build 3D Mesh
+      // Geometry
       const geometry = new THREE.BoxGeometry(widthMm, heightMm, 1.8, resX-1, resY-1, 1);
       const pos = geometry.attributes.position;
-      
       const border = 4;
       
       for(let i=0; i<pos.count; i++) {
          if(pos.getZ(i) > 0) {
-            let x = pos.getX(i) + widthMm/2; // 0 to 46
-            let y = pos.getY(i) + heightMm/2; // 0 to 138
+            let x = pos.getX(i) + widthMm/2; 
+            let y = pos.getY(i) + heightMm/2; 
             
             let px = Math.round((x/widthMm)*(resX-1));
-            let py = resY - 1 - Math.round((y/heightMm)*(resY-1)); // Flip Y for canvas
+            let py = resY - 1 - Math.round((y/heightMm)*(resY-1)); 
             
-            let isInside = false;
-            let isBorder = false;
-            let isHole = false;
+            let isInside = false, isBorder = false, isHole = false;
+            let currentZone = state.zones[0];
             
             if(state.style === 'standard') {
                isInside = true;
                if(x < border || x > widthMm-border || y < border || y > heightMm-border) isBorder = true;
-            } 
-            else if (state.style === 'tassel') {
+            } else if (state.style === 'tassel') {
                let dist = Math.hypot(x - 5, (138 - y) - 5);
                if(dist < 2) isHole = true;
                else if(dist < 4) { isInside = true; isBorder = true; }
@@ -480,8 +524,10 @@
                  isInside = true;
                  if(x < border || x > widthMm-border || y < border || y > heightMm-border) isBorder = true;
                }
-            } 
-            else if (state.style === 'clip') {
+            } else if (state.style === 'clip') {
+               if(y > 138-46) currentZone = state.zones[0];
+               else currentZone = state.zones[1];
+
                let distTop = Math.hypot(x - 23, y - 115);
                if(distTop <= 23) {
                   isInside = true;
@@ -509,40 +555,35 @@
                   let idx = (py * resX + px) * 4;
                   let rawLum = finalData[idx] !== undefined ? finalData[idx] : 255;
                   
-                  // Text check: If pure black pixel, override with TextZ
                   if(rawLum === 0) {
-                      pos.setZ(i, state.adj.textz);
+                      pos.setZ(i, currentZone.textz);
                   } else {
                       let lum = rawLum / 255;
-                      lum = Math.pow(lum, state.adj.mid);
-                      let zVal = 1.8 - lum * (1.8 - 0.6);
-                      pos.setZ(i, zVal);
+                      lum = Math.pow(lum, currentZone.mid);
+                      pos.setZ(i, 1.8 - lum * (1.8 - 0.6));
                   }
                }
             }
          } else {
-            pos.setZ(i, 0); // Flat back
+            pos.setZ(i, 0);
          }
       }
       
       geometry.computeVertexNormals();
-      
       const tex = new THREE.CanvasTexture(canvas);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.flipY = false;
       material.emissiveMap = tex;
       
       currentMesh = new THREE.Mesh(geometry, material);
-      currentMesh.rotation.x = -Math.PI/2; // Lay flat for viewing
+      currentMesh.rotation.x = -Math.PI/2; 
       scene.add(currentMesh);
     }
 
-    document.getElementById('updatePreviewBtn').addEventListener('click', () => processCanvasAndMesh(false));
-
     document.getElementById('exportBtn').addEventListener('click', () => {
-      document.getElementById('exportBtn').innerText = "Processing High-Res STL...";
+      document.getElementById('exportBtn').innerText = "PROCESSING 3D MESH...";
       setTimeout(() => {
-        processCanvasAndMesh(true); // Force high res
+        processCanvasAndMesh(true); // Forces hi-res
         const exporter = new STLExporter();
         const result = exporter.parse(currentMesh, { binary: true });
         const blob = new Blob([result], { type: 'application/octet-stream' });
@@ -550,14 +591,16 @@
         link.href = URL.createObjectURL(blob);
         link.download = `Bookmark_${state.style}_${Date.now()}.stl`;
         link.click();
-        document.getElementById('exportBtn').innerText = "Export STL";
+        document.getElementById('exportBtn').innerText = "EXPORT STL FILE";
       }, 100);
     });
 
     window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      if(document.getElementById('view-preview').classList.contains('active')) {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      }
     });
 
     function animate() {
@@ -566,8 +609,6 @@
     }
     animate();
 
-    // Initial Empty Mesh
-    processCanvasAndMesh(false);
   </script>
 </body>
 </html>
